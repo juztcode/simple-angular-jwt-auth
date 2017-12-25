@@ -40,6 +40,23 @@ export class AuthProvider {
     return await this.clearAuth();
   }
 
+  public async setAuth(auth: Auth): Promise<boolean> {
+    if (auth.accessToken === null || this.accessToken === '') {
+      return false;
+    }
+
+    this.accessToken = auth.accessToken;
+    this.refreshToken = auth.refreshToken;
+
+    if (this.authConfig.persistTokens) {
+      const accessTokenPromise = this.authConfig.tokenSetter('access-token', auth.accessToken);
+      const refreshTokenPromise = this.authConfig.tokenSetter('refresh-token', auth.refreshToken);
+      await Promise.all([accessTokenPromise, refreshTokenPromise]);
+    }
+
+    return true;
+  }
+
   public getAccessToken(): string {
     return this.accessToken;
   }
@@ -60,23 +77,6 @@ export class AuthProvider {
     }
 
     return this.accessToken ? {accessToken: this.accessToken, refreshToken: this.refreshToken} : null;
-  }
-
-  private async setAuth(auth: Auth): Promise<boolean> {
-    if (auth.accessToken === null || this.accessToken === '') {
-      return false;
-    }
-
-    this.accessToken = auth.accessToken;
-    this.refreshToken = auth.refreshToken;
-
-    if (this.authConfig.persistTokens) {
-      const accessTokenPromise = this.authConfig.tokenSetter('access-token', auth.accessToken);
-      const refreshTokenPromise = this.authConfig.tokenSetter('refresh-token', auth.refreshToken);
-      await Promise.all([accessTokenPromise, refreshTokenPromise]);
-    }
-
-    return true;
   }
 
   private async clearAuth(): Promise<boolean> {
