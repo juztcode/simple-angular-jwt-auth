@@ -20,15 +20,11 @@ export class TokenInterceptor implements HttpInterceptor {
   }
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    if (this.authConfig.accessTokenEnabled) {
-      const authenticatedRequest = this.authenticate(request);
-      return next.handle(authenticatedRequest).pipe(catchError(err => this.retryRequest(err, request, next)));
-    } else {
-      return next.handle(request);
-    }
+    const authenticatedRequest = this.authenticate(request);
+    return next.handle(authenticatedRequest).pipe(catchError(err => this.handleError(err, request, next)));
   }
 
-  private retryRequest(error: HttpErrorResponse | any, request: HttpRequest<any>, next: HttpHandler) {
+  private handleError(error: HttpErrorResponse | any, request: HttpRequest<any>, next: HttpHandler) {
     const errorBody = <ApiError>error.error;
 
     if (this.authConfig.refreshTokenEnabled && error.status === this.authConfig.accessTokenExpiredResponseStatus &&
@@ -54,7 +50,7 @@ export class TokenInterceptor implements HttpInterceptor {
     if (this.authConfig.refreshTokenEnabled && request.url === this.authConfig.refreshTokenUrl) {
       headers = headers.set(this.authConfig.refreshTokenHeaderName,
         `${this.authConfig.refreshTokenPrefix} ${authProvider.getRefreshToken()}`);
-    } else if (this.authConfig.accessTokenEnabled && !this.inExcludedUrls(request.url)) {
+    } else if (!this.inExcludedUrls(request.url)) {
       headers = headers.set(this.authConfig.accessTokenHeaderName,
         `${this.authConfig.accessTokenPrefix} ${authProvider.getAccessToken()}`);
     }

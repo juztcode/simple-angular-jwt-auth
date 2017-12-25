@@ -5,7 +5,11 @@ export interface AuthConfigAdditional {
   refreshTokenExpiredErrorCode?: number;
   accessTokenHeaderName?: string;
   accessTokenPrefix?: string;
+  accessTokenStorageKey?: string;
   refreshTokenHeaderName?: string;
   refreshTokenPrefix?: string;
+  refreshTokenStorageKey?: string;
   tokenInterceptorExcludedUrls?: string[];
+  userIdKey?: string;
+  userRoleIdKey?: string;
 }

@@ -10,4 +10,8 @@ export const DEFAULT_ADDITIONAL_AUTH_CONFIG: AuthConfigAdditional = {
   refreshTokenHeaderName: 'Authorization',
   refreshTokenPrefix: 'Basic',
   tokenInterceptorExcludedUrls: [],
+  accessTokenStorageKey: 'access-token',
+  refreshTokenStorageKey: 'refresh-token',
+  userIdKey: 'userId',
+  userRoleIdKey: 'userRoleId'
 };

@@ -14,7 +14,6 @@ export class AuthConfigProvider {
 
   private setConfig(config: AuthConfig & AuthConfigAdditional) {
     if (config.loginUrl === null) {
-      config.accessTokenEnabled = false;
       config.refreshTokenEnabled = false;
     }
 
@@ -23,7 +22,11 @@ export class AuthConfigProvider {
     }
 
     if (!(config.tokenGetter && config.tokenSetter && config.tokenRemover)) {
-      config.persistTokens = false;
+      config.persistTokensEnabled = false;
+    }
+
+    if (!((config.permissionDataSet && config.permissionDataSet.length > 0) || config.getPermissionUrl)) {
+      config.userPermissionsEnabled = false;
     }
 
     config.tokenInterceptorExcludedUrls.push(config.loginUrl);

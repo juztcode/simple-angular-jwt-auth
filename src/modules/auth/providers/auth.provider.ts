@@ -6,6 +6,7 @@ import {AuthConfig} from '../types/auth-config.type';
 import {AuthConfigAdditional} from '../types/auth-config-additional.type';
 import {Auth} from '../types/auth.type';
 import {TokenDecoderHelper} from '../helpers/token-decoder.helper';
+import {PermissionProvider} from './permission.provider';
 
 @Injectable()
 export class AuthProvider {
@@ -13,23 +14,27 @@ export class AuthProvider {
   private refreshToken: string;
   private authConfig: AuthConfig & AuthConfigAdditional;
 
-  constructor(private authConfigProvider: AuthConfigProvider, private http: HttpClient) {
+  constructor(private authConfigProvider: AuthConfigProvider, private permissionProvider: PermissionProvider, private http: HttpClient) {
     this.authConfig = this.authConfigProvider.getConfig();
   }
 
   public async login(username: string, password: string): Promise<boolean> {
     const body = {username: username, password: password};
-    const auth = await this.http.post<Auth>(this.authConfig.loginUrl, JSON.stringify(body)).toPromise();
-    return await this.setAuth(auth);
+    if (this.authConfig.loginUrl) {
+      const auth = await this.http.post<Auth>(this.authConfig.loginUrl, JSON.stringify(body)).toPromise();
+      return await this.setAuth(auth);
+    } else {
+      throw new Error('login url not set');
+    }
   }
 
   public async refresh(): Promise<boolean> {
-    if (this.authConfig.refreshTokenEnabled) {
+    if (this.authConfig.refreshTokenEnabled && this.authConfig.refreshTokenUrl) {
       const auth = await this.http.get<Auth>(this.authConfig.refreshTokenUrl).toPromise();
       return await this.setAuth(auth);
+    } else {
+      throw new Error('refresh token not enabled or refresh token url not set');
     }
-
-    return false;
   }
 
   public async isLoggedIn(): Promise<boolean> {
@@ -48,10 +53,14 @@ export class AuthProvider {
     this.accessToken = auth.accessToken;
     this.refreshToken = auth.refreshToken;
 
-    if (this.authConfig.persistTokens) {
-      const accessTokenPromise = this.authConfig.tokenSetter('access-token', auth.accessToken);
-      const refreshTokenPromise = this.authConfig.tokenSetter('refresh-token', auth.refreshToken);
+    if (this.authConfig.persistTokensEnabled) {
+      const accessTokenPromise = this.authConfig.tokenSetter(this.authConfig.accessTokenStorageKey, auth.accessToken);
+      const refreshTokenPromise = this.authConfig.tokenSetter(this.authConfig.refreshTokenStorageKey, auth.refreshToken);
       await Promise.all([accessTokenPromise, refreshTokenPromise]);
+    }
+
+    if (this.authConfig.userPermissionsEnabled) {
+      await this.permissionProvider.setPermissionByUserRoleId(this.getValueInToken(this.authConfig.userRoleIdKey));
     }
 
     return true;
@@ -62,7 +71,11 @@ export class AuthProvider {
   }
 
   public getRefreshToken(): string {
-    return this.refreshToken;
+    if (this.authConfig.refreshTokenEnabled) {
+      return this.refreshToken;
+    } else {
+      throw new Error('refresh token not enabled');
+    }
   }
 
   public getValueInToken<T>(key: string): T {
@@ -70,9 +83,9 @@ export class AuthProvider {
   }
 
   private async getAuth(): Promise<Auth> {
-    if (!this.accessToken && this.authConfig.persistTokens) {
-      const accessTokenPromise = this.authConfig.tokenGetter('access-token');
-      const refreshTokenPromise = this.authConfig.tokenGetter('refresh-token');
+    if (!this.accessToken && this.authConfig.persistTokensEnabled) {
+      const accessTokenPromise = this.authConfig.tokenGetter(this.authConfig.accessTokenStorageKey);
+      const refreshTokenPromise = this.authConfig.tokenGetter(this.authConfig.refreshTokenStorageKey);
       [this.accessToken, this.refreshToken] = await Promise.all([accessTokenPromise, refreshTokenPromise]);
     }
 
@@ -83,9 +96,9 @@ export class AuthProvider {
     this.accessToken = null;
     this.refreshToken = null;
 
-    if (this.authConfig.persistTokens) {
-      const accessTokenPromise = this.authConfig.tokenRemover('access-token');
-      const refreshTokenPromise = this.authConfig.tokenRemover('refresh-token');
+    if (this.authConfig.persistTokensEnabled) {
+      const accessTokenPromise = this.authConfig.tokenRemover(this.authConfig.accessTokenStorageKey);
+      const refreshTokenPromise = this.authConfig.tokenRemover(this.authConfig.refreshTokenStorageKey);
       await Promise.all([accessTokenPromise, refreshTokenPromise]);
     }
 

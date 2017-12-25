@@ -1,9 +1,13 @@
+import {UserPermissions} from './user-permissions.type';
+
 export interface AuthConfig {
-  persistTokens: boolean;
-  accessTokenEnabled: boolean;
+  persistTokensEnabled: boolean;
   refreshTokenEnabled: boolean;
+  userPermissionsEnabled: boolean;
   loginUrl: string;
-  refreshTokenUrl: string;
+  refreshTokenUrl?: string;
+  getPermissionUrl?: string;
+  permissionDataSet?: UserPermissions[];
   tokenGetter: (tokenName: string) => Promise<string>;
   tokenSetter: (tokenName: string, token: string) => Promise<any>;
   tokenRemover: (tokenName: string) => Promise<any>;
