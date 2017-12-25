@@ -37,14 +37,21 @@ export class AuthProvider {
   }
 
   public async isLoggedIn(): Promise<boolean> {
-    return !!(await this.getAuth());
+    const auth: Auth = {accessToken: null, refreshToken: null};
+    if (!this.accessToken && this.authConfig.persistTokensEnabled) {
+      const accessTokenPromise = this.authConfig.tokenGetter(this.authConfig.accessTokenStorageKey);
+      const refreshTokenPromise = this.authConfig.tokenGetter(this.authConfig.refreshTokenStorageKey);
+      [auth.accessToken, auth.refreshToken] = await Promise.all([accessTokenPromise, refreshTokenPromise]);
+    }
+
+    return await this.setAuth(auth);
   }
 
   public async logOut(): Promise<boolean> {
     return await this.clearAuth();
   }
 
-  public async setAuth(auth: Auth): Promise<boolean> {
+  public async setAuth(auth: Auth, persist: boolean = true): Promise<boolean> {
     if (auth.accessToken === null || this.accessToken === '') {
       return false;
     }
@@ -52,7 +59,7 @@ export class AuthProvider {
     this.accessToken = auth.accessToken;
     this.refreshToken = auth.refreshToken;
 
-    if (this.authConfig.persistTokensEnabled) {
+    if (persist && this.authConfig.persistTokensEnabled) {
       const accessTokenPromise = this.authConfig.tokenSetter(this.authConfig.accessTokenStorageKey, auth.accessToken);
       const refreshTokenPromise = this.authConfig.tokenSetter(this.authConfig.refreshTokenStorageKey, auth.refreshToken);
       await Promise.all([accessTokenPromise, refreshTokenPromise]);
