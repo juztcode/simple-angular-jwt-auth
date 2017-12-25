@@ -4,6 +4,7 @@ import {Observable} from 'rxjs/Observable';
 import {catchError} from 'rxjs/operators';
 import 'rxjs/add/observable/fromPromise';
 import 'rxjs/add/operator/mergeMap';
+import 'rxjs/add/observable/throw';
 
 import {AuthProvider} from '../providers/auth.provider';
 import {ApiError} from '../types/api-error.type';
@@ -36,7 +37,7 @@ export class TokenInterceptor implements HttpInterceptor {
       });
     }
 
-    return Observable.throw(new Error(`${errorBody.errorMessage} occurred. Error code is ${errorBody.errorCode}`));
+    return Observable.throw(new Error(`${errorBody.errorMessage} error occurred. error code is ${errorBody.errorCode}`));
   }
 
   private authenticate(request: HttpRequest<any>): HttpRequest<any> {

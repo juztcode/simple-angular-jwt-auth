@@ -6,6 +6,7 @@ import {AuthConfigProvider} from './providers/auth-config.provider';
 import {AuthConfig} from './types/auth-config.type';
 import {AuthConfigAdditional} from './types/auth-config-additional.type';
 import {AuthProvider} from './providers/auth.provider';
+import {PermissionProvider} from './providers/permission.provider';
 
 @NgModule()
 export class AuthModule {
@@ -17,6 +18,7 @@ export class AuthModule {
       ngModule: AuthModule,
       providers: [
         AuthProvider,
+        PermissionProvider,
         {
           provide: AuthConfigProvider,
           useValue: new AuthConfigProvider(config)

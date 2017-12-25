@@ -7,6 +7,6 @@ import {AuthProvider} from '../modules/auth';
 })
 export class AppComponent {
   constructor(private authProvider: AuthProvider) {
-    console.log(this.authProvider.getValueInToken<number>('userId'));
+    this.authProvider.login('randil@balcoo.com', '222222');
   }
 }
