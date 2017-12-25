@@ -44,7 +44,7 @@ export class AuthProvider {
       [auth.accessToken, auth.refreshToken] = await Promise.all([accessTokenPromise, refreshTokenPromise]);
     }
 
-    return await this.setAuth(auth);
+    return await this.setAuth(auth, false);
   }
 
   public async logOut(): Promise<boolean> {
@@ -52,7 +52,7 @@ export class AuthProvider {
   }
 
   public async setAuth(auth: Auth, persist: boolean = true): Promise<boolean> {
-    if (auth.accessToken === null || this.accessToken === '') {
+    if (!auth.accessToken || auth.accessToken === '') {
       return false;
     }
 
