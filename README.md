@@ -1,7 +1,6 @@
 # AuthPackage
 
 Authentication package for angular 5 based on HttpCliendModule. Easy to configure. 
-This project also contains sample application which you can use to test the package.
 
 ## Serve project (Test package)
 

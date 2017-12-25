@@ -18,10 +18,9 @@ export class AuthProvider {
     this.authConfig = this.authConfigProvider.getConfig();
   }
 
-  public async login(username: string, password: string): Promise<boolean> {
-    const body = {username: username, password: password};
+  public async login(requestBody: any): Promise<boolean> {
     if (this.authConfig.loginUrl) {
-      const auth = await this.http.post<Auth>(this.authConfig.loginUrl, JSON.stringify(body)).toPromise();
+      const auth = await this.http.post<Auth>(this.authConfig.loginUrl, JSON.stringify(requestBody)).toPromise();
       return await this.setAuth(auth);
     } else {
       throw new Error('login url not set');
