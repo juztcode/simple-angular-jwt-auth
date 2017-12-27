@@ -42,3 +42,4 @@ testem.log
 Thumbs.db
 
 .ng_pkg_build
+.badge.json
