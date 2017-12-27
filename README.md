@@ -107,7 +107,9 @@ export const DEFAULT_ADDITIONAL_AUTH_CONFIG: AuthConfigAdditional = {
   accessTokenStorageKey: 'access-token',
   refreshTokenStorageKey: 'refresh-token',
   userIdKey: 'userId',
-  userRoleIdKey: 'userRoleId'
+  userRoleIdKey: 'userRoleId',
+  convertToAuthType: (auth: Auth) => auth,
+  convertToUserPermissionType: (userPermissions: UserPermissions) => userPermissions
 };
 ```
 
@@ -126,9 +128,8 @@ export const DEFAULT_ADDITIONAL_AUTH_CONFIG: AuthConfigAdditional = {
 
 1. accessTokenStorageKey = key used when storing the access-token in key value pair.
 1. refreshTokenStorageKey = key used when storing the refresh-token in key value pair.
-
 1. userIdKey - attribute name related to the userId inside the access-token payload.
-2. userRoleIdKey - attribute name related to the userRoleId inside the access-token payload.
+1. userRoleIdKey - attribute name related to the userRoleId inside the access-token payload.
 
 >Note: To use permissions feature you need to have userRoleId inside the token. The user role id must be a one present in the permission data set.
 
@@ -151,6 +152,76 @@ sample token payload
 {
   "userId": 100,
   "userRoleId": 1
+}
+```
+
+You configure the auth response type and permission response type.
+This library uses the generator functions to convert response to the relevant type.
+
+1. convertToAuthType - This function used to convert the response to the Auth type
+
+>Note: If not supplied the default function is used
+
+```typescript
+(data: Auth) => {
+  return data;
+}
+```
+
+If the auth type sent from the server is different you can pass a generator function to get the Auth type
+If the auth type from server
+```json
+{
+  "bearer": "access-token", 
+  "basic": "refresh-token"
+}
+```
+
+Then the generator function
+```typescript
+(data: any) => {
+  const auth: Auth = {accessToken: authFromServer.bearer, refreshToken: authFromServer.basic};
+  return auth;
+}
+```
+
+1. convertToUserPermissionType - This function used to convert the response to the UserPermission type
+
+>Note: If not supplied the default function is used
+
+```typescript
+(data: UserPermissions) => {
+  return data;
+}
+```
+
+If the user permission type sent from the server is different you can pass a generator function to get the UserPermissions type.
+The library will iterate through the data set sent from the server and apply the generator function to get the UserPermissions type.
+If the permission type from server
+```json
+[
+  {
+    "role": 1,
+    "permission": [true, true, false]
+  },
+  {
+    "role": 2,
+    "permissions": [true, false, false]
+  }
+]
+```
+
+Then the generator function
+```typescript
+(data: any) => {
+  const userPermissions: UserPermissions = {
+    userRoleId: data.role,
+    permissions: {
+      canViewHome: data.permissions[0],
+      canViewSettings: data.permissions[1],
+      canViewInfo: data.permissions[2]
+    }
+  }
 }
 ```
 
