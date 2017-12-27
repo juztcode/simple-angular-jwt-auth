@@ -25,7 +25,7 @@ export class PermissionProvider {
   public async setPermissionByUserRoleId(userRoleId: number) {
     if (this.authConfig.userPermissionsEnabled) {
       await this.loadUserPermissionDataSet();
-      if (this.permissionDataSet && this.permissionDataSet === 0) {
+      if (this.permissionDataSet && this.permissionDataSet.length === 0) {
         throw new Error('permissions not loaded');
       }
       const userPermissions = this.permissionDataSet.filter(up => up.userRoleId === userRoleId)[0];
