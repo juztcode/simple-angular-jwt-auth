@@ -20,7 +20,7 @@ export class AuthProvider {
 
   public async login(requestBody: any): Promise<boolean> {
     if (this.authConfig.loginUrl) {
-      const auth = await this.http.post<Auth>(this.authConfig.loginUrl, JSON.stringify(requestBody)).toPromise();
+      const auth = await this.sendLoginRequest(requestBody);
       return await this.setAuth(auth);
     } else {
       throw new Error('login url not set');
@@ -29,7 +29,7 @@ export class AuthProvider {
 
   public async refresh(): Promise<boolean> {
     if (this.authConfig.refreshTokenEnabled && this.authConfig.refreshTokenUrl) {
-      const auth = await this.http.get<Auth>(this.authConfig.refreshTokenUrl).toPromise();
+      const auth = await this.sendRefreshTokenRequest();
       return await this.setAuth(auth);
     } else {
       throw new Error('refresh token not enabled or refresh token url not set');
@@ -109,6 +109,16 @@ export class AuthProvider {
     }
 
     return true;
+  }
+
+  private async sendLoginRequest(requestBody: any): Promise<Auth> {
+    const data = await this.http.post<any>(this.authConfig.loginUrl, JSON.stringify(requestBody)).toPromise();
+    return this.authConfig.convertToAuthType(data);
+  }
+
+  private async sendRefreshTokenRequest(): Promise<Auth> {
+    const data = await this.http.get<any>(this.authConfig.refreshTokenUrl).toPromise();
+    return this.authConfig.convertToAuthType(data);
   }
 }
 

@@ -7,7 +7,7 @@ import {UserPermissions} from '../types/user-permissions.type';
 @Injectable()
 export class PermissionProvider {
   private authConfig: AuthConfig & AuthConfigAdditional;
-  private permissionDataSet: UserPermissions[] = [];
+  private permissionDataSet: UserPermissions[];
   private permissions = {};
 
   constructor(private authConfigProvider: AuthConfigProvider, private http: HttpClient) {
@@ -25,6 +25,9 @@ export class PermissionProvider {
   public async setPermissionByUserRoleId(userRoleId: number) {
     if (this.authConfig.userPermissionsEnabled) {
       await this.loadUserPermissionDataSet();
+      if (this.permissionDataSet && this.permissionDataSet === 0) {
+        throw new Error('permissions not loaded');
+      }
       const userPermissions = this.permissionDataSet.filter(up => up.userRoleId === userRoleId)[0];
       Object.assign(this.permissions, userPermissions.permissions);
     } else {
@@ -36,21 +39,30 @@ export class PermissionProvider {
     if (this.authConfig.userPermissionsEnabled) {
       if (this.permissionDataSet && this.permissionDataSet.length > 0) {
         return;
-      }
-
-      let permissionDataSet = this.authConfig.permissionDataSet;
-      if (!this.authConfig.permissionDataSet || this.authConfig.permissionDataSet.length === 0) {
+      } else if (this.authConfig.permissionDataSet && this.authConfig.permissionDataSet.length > 0) {
+        this.permissionDataSet = this.authConfig.permissionDataSet;
+        return;
+      } else {
         try {
-          permissionDataSet = await this.http.get<UserPermissions[]>(this.authConfig.getPermissionUrl).toPromise();
+          this.permissionDataSet = await this.sendGetPermissionsRequest();
         } catch (e) {
           throw new Error('permission data set loading failed');
         }
       }
 
-      permissionDataSet.forEach(userPermission => this.permissionDataSet.push(userPermission));
+      if (!this.permissionDataSet || this.permissionDataSet.length === 0) {
+        throw new Error('null permission data set loaded');
+      }
     } else {
       throw new Error('permissions not enabled');
     }
+  }
+
+  private async sendGetPermissionsRequest(): Promise<UserPermissions[]> {
+    const dataSet = await this.http.get<any[]>(this.authConfig.getPermissionUrl).toPromise();
+    const permissionDataSet: UserPermissions[] = [];
+    dataSet.forEach(data => permissionDataSet.push(this.authConfig.convertToUserPermissionType(data)));
+    return permissionDataSet;
   }
 
 }

@@ -1,4 +1,5 @@
 import {AuthConfigAdditional} from '../types/auth-config-additional.type';
+import {Auth, UserPermissions} from '../';
 
 export const DEFAULT_ADDITIONAL_AUTH_CONFIG: AuthConfigAdditional = {
   accessTokenExpiredResponseStatus: 403,
@@ -13,5 +14,7 @@ export const DEFAULT_ADDITIONAL_AUTH_CONFIG: AuthConfigAdditional = {
   accessTokenStorageKey: 'access-token',
   refreshTokenStorageKey: 'refresh-token',
   userIdKey: 'userId',
-  userRoleIdKey: 'userRoleId'
+  userRoleIdKey: 'userRoleId',
+  convertToAuthType: (auth: Auth) => auth,
+  convertToUserPermissionType: (userPermissions: UserPermissions) => userPermissions
 };
