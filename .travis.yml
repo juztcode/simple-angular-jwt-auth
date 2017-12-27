@@ -1,16 +1,15 @@
 language: node_js
 node_js: 8
 after_success:
-  - npm run build
+- npm run build
 before_deploy:
-  - cd dist
+- cd dist
 deploy:
   provider: npm
   email: randil.fernando@outlook.com
   skip_cleanup: true
-  api_key:
-    secure: qN+p5t0Eua0uWkH7XPo78OqGJs2/I88jTrNwkA+xJ7CwPKcGyU337I4/KbPWkXwekUqJrfEllWD6NHPBGrouNyDPVN67Mi31q7OV1/P4cHc1je9fwZrJ83hhAG0YR76qXfGq0Z6i18qv7dlgK3g7Utx7nY11u6qZBq2WAMw7NZtf6O/5Uxd5JZoEd02Lr5RjAAu14cnjiRzCgW/+p/m/zwczwtCOPkoD3aYS4N9Gx299wvoiGbEWlaM3QHdTN1Ot3+kiwC8aq0zG0kLPl7DVzGvVfNEedClr4I+Y+LAbRn7sL/bmOnVstzoBes8X/kXjUsn5WpKPRhfkMCF6tTc2U64ep/kOOfJ0Z8p1XJb2d/q2rE6ndEpr3cFyxh6LvRPNIPRGiMSO3NvCjGhryDyYuQyK17M9VF10rhp4rjG+x+NUr2YRKMBrZ+0vRywWDRzk6+gFo42upiolg3oYRSso9fTwNRUPvy0UooEozbQCeIW1De1HqaC6rL4NkKS/PDNwfYNNAg6MTkcc+xhuflsExv7I/L9sNVrTNI+bKoBiHjVk0S4opH7/ww4W43YuNOtzJ9UY9EiH2/cjjOhTVP5ayCPuEE3rfZVzX65ZM1pvSdTENEBBzqzNMs2uY28rFu2P0VUnHW5vfqeE/gNV5E6NLXnGlLQzEcjNoPwQqaooC5w=
   on:
     tags: true
-    repo: randilfernando/jwt-auth
     branch: master
+  api_key:
+    secure: iEqsj9XjqocVrVbASBC+xdq2O6pHhNBZRpwT7C88iLp42izyW0rYp6/BTeqXlf7Rdv8Uf2sqQ/4yRI9vhAQOCc7rwutfCMABpo1cQv2THGRIEDmgkHqS8CEobhi+7HE6r/oL3ae37QuAzRP4qFJWABH1al2DQObcnoaN2IxkmmybGq4u8opjPHp1bfiBlUAV98EXwvHaF+IKl3QE3KUL9DdZD6ok+29x/WFxkHz4j8YJ/Orykgqegg/ApeFXmaoSMsslbho41HD29Xg7KIu/lh1SywxaaFZdVWY3NWYnrArLwVntG4L5wv5/sLt5gqGKMNDnA2QeJ4J6LKgfKAFg8+nyOFt+qji3fnhHGvab9WSGzG47FF64ilCVxgehHQhyMPxa+wjzfYGdRghFGe8+rXZV0tAEqWkaMgTP1llhMh6zKBNsrgGkcJthIHQxc69F8W4PuBT6Oauoh/EsP3VKIrUXakt7JyqlCfSwR+mIDkcLUDOwwGf5vdQ49I5pdf27W2V/qSwV/xrCodjiYrhBY60suSnnaR/79Fxy5G29fKhemMxTwKtlWvWYlDdpijoW2b+jRzmNbL+l4Y3L1jDS+D7OgnTO5HaRtezxRCRHfPUdufV8ZNDHR+vyKdKAhDSKTVUcvJ6Ll5AvREPHyEHJ022pahwC010QDklraWx4u6M=
