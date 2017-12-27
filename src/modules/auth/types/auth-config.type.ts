@@ -8,7 +8,7 @@ export interface AuthConfig {
   refreshTokenUrl?: string;
   getPermissionUrl?: string;
   permissionDataSet?: UserPermissions[];
-  tokenGetter: (tokenName: string) => Promise<string>;
-  tokenSetter: (tokenName: string, token: string) => Promise<any>;
-  tokenRemover: (tokenName: string) => Promise<any>;
+  tokenGetter?: (tokenName: string) => Promise<string>;
+  tokenSetter?: (tokenName: string, token: string) => Promise<any>;
+  tokenRemover?: (tokenName: string) => Promise<any>;
 }

@@ -1,3 +1,6 @@
+import {UserPermissions} from './user-permissions.type';
+import {Auth} from './auth.type';
+
 export interface AuthConfigAdditional {
   accessTokenExpiredResponseStatus?: number;
   accessTokenExpiredErrorCode?: number;
@@ -12,4 +15,6 @@ export interface AuthConfigAdditional {
   tokenInterceptorExcludedUrls?: string[];
   userIdKey?: string;
   userRoleIdKey?: string;
+  convertToAuthType?: (data: any) => Auth;
+  convertToUserPermissionType?: (data: any) => UserPermissions;
 }
