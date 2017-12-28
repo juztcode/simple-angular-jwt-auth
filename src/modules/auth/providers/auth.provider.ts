@@ -52,24 +52,17 @@ export class AuthProvider {
   }
 
   public async setAuth(auth: Auth, persist: boolean = true): Promise<boolean> {
-    if (!auth.accessToken || auth.accessToken === '') {
-      return false;
+    const condition = auth.accessToken && auth.accessToken !== '';
+
+    if (condition) {
+      await Promise.all([this.setAccessToken(auth.accessToken, persist), this.setRefreshToken(auth.refreshToken, persist)]);
+
+      if (this.authConfig.userPermissionsEnabled) {
+        await this.permissionProvider.setPermissionByUserRoleId(this.getValueInToken(this.authConfig.userRoleIdKey));
+      }
     }
 
-    this.accessToken = auth.accessToken;
-    this.refreshToken = auth.refreshToken;
-
-    if (persist && this.authConfig.persistTokensEnabled) {
-      const accessTokenPromise = this.authConfig.tokenSetter(this.authConfig.accessTokenStorageKey, auth.accessToken);
-      const refreshTokenPromise = this.authConfig.tokenSetter(this.authConfig.refreshTokenStorageKey, auth.refreshToken);
-      await Promise.all([accessTokenPromise, refreshTokenPromise]);
-    }
-
-    if (this.authConfig.userPermissionsEnabled) {
-      await this.permissionProvider.setPermissionByUserRoleId(this.getValueInToken(this.authConfig.userRoleIdKey));
-    }
-
-    return true;
+    return condition;
   }
 
   public getAccessToken(): string {
@@ -82,6 +75,32 @@ export class AuthProvider {
     } else {
       throw new Error('refresh token not enabled');
     }
+  }
+
+  private async setAccessToken(token: string, persist: boolean = true): Promise<boolean> {
+    const condition = token && token !== '';
+
+    if (condition) {
+      this.accessToken = token;
+      if (persist && this.authConfig.persistTokensEnabled) {
+        await this.authConfig.tokenSetter(this.authConfig.accessTokenStorageKey, token);
+      }
+    }
+
+    return condition;
+  }
+
+  private async setRefreshToken(token: string, persist: boolean = true): Promise<boolean> {
+    const condition = token && token !== '';
+
+    if (condition) {
+      this.refreshToken = token;
+      if (persist && this.authConfig.persistTokensEnabled) {
+        await this.authConfig.tokenSetter(this.authConfig.refreshTokenStorageKey, token);
+      }
+    }
+
+    return condition;
   }
 
   public getValueInToken<T>(key: string): T {
