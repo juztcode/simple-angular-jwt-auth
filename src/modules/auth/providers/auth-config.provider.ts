@@ -1,33 +1,38 @@
 import {AuthConfig} from '../types/auth-config.type';
 import {AuthConfigAdditional} from '../types/auth-config-additional.type';
+import {DEFAULT_ADDITIONAL_AUTH_CONFIG} from '../constants/default.constants';
 
 export class AuthConfigProvider {
   private config: AuthConfigAdditional & AuthConfig;
 
-  constructor(config: AuthConfig & AuthConfigAdditional) {
-    this.setConfig(config);
+  constructor(config: AuthConfig, additionalConfig: AuthConfigAdditional) {
+    this.setConfig(config, additionalConfig);
   }
 
   public getConfig(): AuthConfig & AuthConfigAdditional {
     return this.config;
   }
 
-  private setConfig(config: AuthConfig & AuthConfigAdditional) {
-    if (config.refreshTokenUrl === null) {
-      config.refreshTokenEnabled = false;
+  private setConfig(mainConfig: AuthConfig, additionalConfig: AuthConfigAdditional) {
+    if (mainConfig.refreshTokenUrl === null) {
+      mainConfig.refreshTokenEnabled = false;
       console.error('refreshTokenUrl is not present. setting refreshTokenEnabled to false');
     }
 
-    if (!(config.tokenGetter && config.tokenSetter && config.tokenRemover)) {
-      config.persistTokensEnabled = false;
+    if (!(mainConfig.tokenGetter && mainConfig.tokenSetter && mainConfig.tokenRemover)) {
+      mainConfig.persistTokensEnabled = false;
       console.error('tokenGetter, tokenSetter or tokenRemover functions not present setting persistTokens to false');
     }
 
-    if (!((config.permissionDataSet && config.permissionDataSet.length > 0) || config.getPermissionUrl)) {
-      config.userPermissionsEnabled = false;
+    if (!((mainConfig.permissionDataSet && mainConfig.permissionDataSet.length > 0) || mainConfig.getPermissionUrl)) {
+      mainConfig.userPermissionsEnabled = false;
       console.error('permissions data set not present or getPermissionUrl not present setting userPermissionsEnabled to false');
     }
 
+    const config: any = {};
+    Object.assign(config, mainConfig);
+    Object.assign(config, DEFAULT_ADDITIONAL_AUTH_CONFIG);
+    Object.assign(config, additionalConfig);
     config.tokenInterceptorExcludedUrls.push(config.loginUrl);
 
     this.config = config;

@@ -5,7 +5,8 @@
   "version": "0.0.7",
   "license": "MIT",
   "scripts": {
-    "build": "ng-packagr -p ng-package.json"
+    "build": "ng-packagr -p ng-package.json",
+    "pack": "npm run build && cd ./dist && npm pack"
   },
   "repository": {
     "type": "git",

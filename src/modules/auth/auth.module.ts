@@ -11,9 +11,6 @@ import {PermissionProvider} from './providers/permission.provider';
 @NgModule()
 export class AuthModule {
   static forRoot(mainConfig: AuthConfig, additionalConfig?: AuthConfigAdditional): ModuleWithProviders {
-    const config: any = DEFAULT_ADDITIONAL_AUTH_CONFIG;
-    Object.assign(config, mainConfig, additionalConfig);
-
     return {
       ngModule: AuthModule,
       providers: [
@@ -21,7 +18,7 @@ export class AuthModule {
         PermissionProvider,
         {
           provide: AuthConfigProvider,
-          useValue: new AuthConfigProvider(config)
+          useValue: new AuthConfigProvider(mainConfig, additionalConfig)
         },
         {
           provide: HTTP_INTERCEPTORS,
