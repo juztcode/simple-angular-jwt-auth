@@ -26,7 +26,7 @@ export class TokenInterceptor implements HttpInterceptor {
   }
 
   private handleError(error: HttpErrorResponse | any, request: HttpRequest<any>, next: HttpHandler) {
-    const errorBody = <ApiError>error.error;
+    const errorBody = this.authConfig.convertToApiErrorType(error.error);
 
     if (this.authConfig.refreshTokenEnabled && error.status === this.authConfig.accessTokenExpiredResponseStatus &&
       errorBody.errorCode === this.authConfig.accessTokenExpiredErrorCode) {
