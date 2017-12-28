@@ -52,7 +52,7 @@ export class AuthProvider {
   }
 
   public async setAuth(auth: Auth, persist: boolean = true): Promise<boolean> {
-    const condition = auth && auth.accessToken && auth.accessToken !== '';
+    const condition = auth !== null && auth.accessToken !== null && typeof auth.accessToken === 'string' && auth.accessToken.length > 0;
 
     if (condition) {
       await Promise.all([this.setAccessToken(auth.accessToken, persist), this.setRefreshToken(auth.refreshToken, persist)]);
@@ -78,7 +78,7 @@ export class AuthProvider {
   }
 
   private async setAccessToken(token: string, persist: boolean = true): Promise<boolean> {
-    const condition = token && token !== '';
+    const condition = token !== null && typeof token === 'string' && token.length > 0;
 
     if (condition) {
       this.accessToken = token;
@@ -91,7 +91,7 @@ export class AuthProvider {
   }
 
   private async setRefreshToken(token: string, persist: boolean = true): Promise<boolean> {
-    const condition = token && token !== '';
+    const condition = this.authConfig.refreshTokenEnabled && token !== null && typeof token === 'string' && token.length > 0;
 
     if (condition) {
       this.refreshToken = token;
