@@ -10,15 +10,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/randilfernando/jwt-auth"
+    "url": "git+https://github.com/randilfernando/simple-angular-jwt-auth"
   },
   "publishConfig": {
     "access": "public"
   },
   "bugs": {
-    "url": "https://github.com/randilfernando/jwt-auth/issues"
+    "url": "https://github.com/randilfernando/simple-angular-jwt-auth/issues"
   },
-  "homepage": "https://github.com/randilfernando/jwt-auth#readme",
+  "homepage": "https://github.com/randilfernando/simple-angular-jwt-auth#readme",
   "keywords": [
     "npm",
     "angular5"

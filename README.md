@@ -331,5 +331,5 @@ This will return the permissions object inside PermissionsProvider and you can u
 
 ## Help
 
-Repository: [github.com/randilfernando/jwt-auth](github.com/randilfernando/jwt-auth)
-Issues: [https://github.com/randilfernando/jwt-auth/issues](https://github.com/randilfernando/jwt-auth/issues)
+Repository: [https://github.com/randilfernando/simple-angular-jwt-auth](https://github.com/randilfernando/simple-angular-jwt-auth)
+Issues: [https://github.com/randilfernando/simple-angular-jwt-auth/issues](https://github.com/randilfernando/simple-angular-jwt-auth/issues)
