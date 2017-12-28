@@ -52,7 +52,7 @@ export class AuthProvider {
   }
 
   public async setAuth(auth: Auth, persist: boolean = true): Promise<boolean> {
-    const condition = auth.accessToken && auth.accessToken !== '';
+    const condition = auth && auth.accessToken && auth.accessToken !== '';
 
     if (condition) {
       await Promise.all([this.setAccessToken(auth.accessToken, persist), this.setRefreshToken(auth.refreshToken, persist)]);
