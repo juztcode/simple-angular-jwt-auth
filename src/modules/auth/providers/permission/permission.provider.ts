@@ -1,8 +1,8 @@
 import {Injectable} from '@angular/core';
-import {AuthConfigProvider} from './auth-config.provider';
-import {AuthConfig, AuthConfigAdditional} from '../';
+import {AuthConfigProvider} from '../auth-config/auth-config.provider';
+import {AuthConfig, AuthConfigAdditional} from '../../';
 import {HttpClient} from '@angular/common/http';
-import {UserPermissions} from '../types/user-permissions.type';
+import {UserPermissions} from '../../types/user-permissions.type';
 
 @Injectable()
 export class PermissionProvider {

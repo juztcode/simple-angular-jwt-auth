@@ -1,5 +1,5 @@
-export * from './providers/auth.provider';
-export * from './providers/permission.provider';
+export * from './providers/auth/auth.provider';
+export * from './providers/permission/permission.provider';
 export * from './auth.module';
 export * from './types/api-error.type';
 export * from './types/auth.type';

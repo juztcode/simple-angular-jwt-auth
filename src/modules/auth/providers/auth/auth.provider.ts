@@ -1,12 +1,12 @@
 import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 
-import {AuthConfigProvider} from './auth-config.provider';
-import {AuthConfig} from '../types/auth-config.type';
-import {AuthConfigAdditional} from '../types/auth-config-additional.type';
-import {Auth} from '../types/auth.type';
-import {TokenDecoderHelper} from '../helpers/token-decoder.helper';
-import {PermissionProvider} from './permission.provider';
+import {AuthConfigProvider} from '../auth-config/auth-config.provider';
+import {AuthConfig} from '../../types/auth-config.type';
+import {AuthConfigAdditional} from '../../types/auth-config-additional.type';
+import {Auth} from '../../types/auth.type';
+import {TokenDecoderHelper} from '../../helpers/token-decoder.helper';
+import {PermissionProvider} from '../permission/permission.provider';
 
 @Injectable()
 export class AuthProvider {

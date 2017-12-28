@@ -1,6 +1,6 @@
-import {AuthConfig} from '../types/auth-config.type';
-import {AuthConfigAdditional} from '../types/auth-config-additional.type';
-import {DEFAULT_ADDITIONAL_AUTH_CONFIG} from '../constants/default.constants';
+import {AuthConfig} from '../../types/auth-config.type';
+import {AuthConfigAdditional} from '../../types/auth-config-additional.type';
+import {DEFAULT_ADDITIONAL_AUTH_CONFIG} from '../../constants/default.constants';
 
 export class AuthConfigProvider {
   private config: AuthConfigAdditional & AuthConfig;
@@ -32,7 +32,9 @@ export class AuthConfigProvider {
     const config: any = {};
     Object.assign(config, mainConfig);
     Object.assign(config, DEFAULT_ADDITIONAL_AUTH_CONFIG);
-    Object.assign(config, additionalConfig);
+    if (additionalConfig) {
+      Object.assign(config, additionalConfig);
+    }
     config.tokenInterceptorExcludedUrls.push(config.loginUrl);
 
     this.config = config;
