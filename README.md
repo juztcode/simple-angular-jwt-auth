@@ -225,6 +225,34 @@ Then the generator function
 }
 ```
 
+1. convertToApiErrorType - This function used to convert the response to the UserPermission type
+
+>Note: If not supplied the default function is used
+
+```typescript
+(apiError: ApiError) => {
+  return apiError
+}
+```
+
+If the error response sent from the server is different you can pass a generator function to get the ApiError type.
+If the error response type from server
+```json
+{
+  "errorResponse": {"errorCode": 4001, "errorMessage": "access token expired."}
+}
+```
+
+Then the generator function
+```typescript
+(error: any) => {
+  const apiError = {
+    errorCode: error.errorResponse.errorCode,
+    errorMessage: error.errorResponse.errorMessage
+  }
+}
+```
+
 ## Use library features in your application
 
 After initializing the library you can use Providers to access features
@@ -303,5 +331,5 @@ This will return the permissions object inside PermissionsProvider and you can u
 
 ## Help
 
-Repository: [github.com/randilfernando/jwt-auth](github.com/randilfernando/jwt-auth)
-Issues: [https://github.com/randilfernando/jwt-auth/issues](https://github.com/randilfernando/jwt-auth/issues)
+Repository: [https://github.com/randilfernando/simple-angular-jwt-auth](https://github.com/randilfernando/simple-angular-jwt-auth)
+Issues: [https://github.com/randilfernando/simple-angular-jwt-auth/issues](https://github.com/randilfernando/simple-angular-jwt-auth/issues)
