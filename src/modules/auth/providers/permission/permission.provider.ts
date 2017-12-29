@@ -26,9 +26,13 @@ export class PermissionProvider {
     if (this.authConfig.userPermissionsEnabled) {
       await this.loadUserPermissionDataSet();
 
+      if (!this.permissionDataSet || this.permissionDataSet.length === 0) {
+        throw new Error('permission data set is empty');
+      }
+
       const result = this.permissionDataSet.filter(up => up.userRoleId === userRoleId);
       if (result.length === 0) {
-        throw new Error('unknown user role');
+        throw new Error(`user role ${userRoleId} is unknown`);
       }
       Object.assign(this.permissions, result[0].permissions);
     } else {
@@ -44,15 +48,7 @@ export class PermissionProvider {
         this.permissionDataSet = this.authConfig.permissionDataSet;
         return;
       } else {
-        try {
-          this.permissionDataSet = await this.sendGetPermissionsRequest();
-        } catch (e) {
-          throw new Error('permission data set loading failed');
-        }
-      }
-
-      if (!this.permissionDataSet || this.permissionDataSet.length === 0) {
-        throw new Error('null permission data set loaded');
+        this.permissionDataSet = await this.sendGetPermissionsRequest();
       }
     } else {
       throw new Error('permissions not enabled');
