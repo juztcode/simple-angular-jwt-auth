@@ -28,8 +28,12 @@ export class PermissionProvider {
       if (this.permissionDataSet && this.permissionDataSet.length === 0) {
         throw new Error('permissions not loaded');
       }
-      const userPermissions = this.permissionDataSet.filter(up => up.userRoleId === userRoleId)[0];
-      Object.assign(this.permissions, userPermissions.permissions);
+
+      const result = this.permissionDataSet.filter(up => up.userRoleId === userRoleId);
+      if (result.length === 0) {
+        throw new Error('unknown user role');
+      }
+      Object.assign(this.permissions, result[0].permissions);
     } else {
       throw new Error('permissions not enabled');
     }
