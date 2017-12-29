@@ -49,7 +49,7 @@ export class AuthProvider {
   }
 
   public async logOut(): Promise<boolean> {
-    return await this.clearAuth();
+    return (await this.clearAuth() && this.permissionProvider.resetPermissions());
   }
 
   public async setAuth(auth: Auth, persist: boolean = true): Promise<boolean> {

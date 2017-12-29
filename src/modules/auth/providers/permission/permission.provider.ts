@@ -40,6 +40,15 @@ export class PermissionProvider {
     }
   }
 
+  public resetPermissions(): boolean {
+    const keys = Object.keys(this.permissions);
+    for (const key of keys) {
+      delete this.permissions[key];
+    }
+
+    return (Object.keys(this.permissions).length === 0);
+  }
+
   private async loadUserPermissionDataSet(): Promise<any> {
     if (this.authConfig.userPermissionsEnabled) {
       if (this.permissionDataSet && this.permissionDataSet.length > 0) {
