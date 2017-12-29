@@ -37,14 +37,15 @@ export class AuthProvider {
   }
 
   public async isLoggedIn(): Promise<boolean> {
-    const auth: Auth = {accessToken: null, refreshToken: null};
     if (!this.accessToken && this.authConfig.persistTokensEnabled) {
+      const auth: Auth = {accessToken: null, refreshToken: null};
       const accessTokenPromise = this.authConfig.tokenGetter(this.authConfig.accessTokenStorageKey);
       const refreshTokenPromise = this.authConfig.tokenGetter(this.authConfig.refreshTokenStorageKey);
       [auth.accessToken, auth.refreshToken] = await Promise.all([accessTokenPromise, refreshTokenPromise]);
+      return await this.setAuth(auth, false);
+    } else {
+      return true;
     }
-
-    return await this.setAuth(auth, false);
   }
 
   public async logOut(): Promise<boolean> {
