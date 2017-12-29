@@ -1,8 +1,8 @@
 import {Injectable} from '@angular/core';
-import {AuthConfigProvider} from './auth-config.provider';
-import {AuthConfig, AuthConfigAdditional} from '../';
+import {AuthConfigProvider} from '../auth-config/auth-config.provider';
+import {AuthConfig, AuthConfigAdditional} from '../../';
 import {HttpClient} from '@angular/common/http';
-import {UserPermissions} from '../types/user-permissions.type';
+import {UserPermissions} from '../../types/user-permissions.type';
 
 @Injectable()
 export class PermissionProvider {
@@ -17,22 +17,36 @@ export class PermissionProvider {
   public getPermissions(): any {
     if (this.authConfig.userPermissionsEnabled) {
       return this.permissions;
+    } else {
+      throw new Error('permissions not enabled');
     }
-
-    throw new Error('permissions not enabled');
   }
 
   public async setPermissionByUserRoleId(userRoleId: number) {
     if (this.authConfig.userPermissionsEnabled) {
       await this.loadUserPermissionDataSet();
-      if (this.permissionDataSet && this.permissionDataSet.length === 0) {
-        throw new Error('permissions not loaded');
+
+      if (!this.permissionDataSet || this.permissionDataSet.length === 0) {
+        throw new Error('permission data set is empty');
       }
-      const userPermissions = this.permissionDataSet.filter(up => up.userRoleId === userRoleId)[0];
-      Object.assign(this.permissions, userPermissions.permissions);
+
+      const result = this.permissionDataSet.filter(up => up.userRoleId === userRoleId);
+      if (result.length === 0) {
+        throw new Error(`user role ${userRoleId} is unknown`);
+      }
+      Object.assign(this.permissions, result[0].permissions);
     } else {
       throw new Error('permissions not enabled');
     }
+  }
+
+  public resetPermissions(): boolean {
+    const keys = Object.keys(this.permissions);
+    for (const key of keys) {
+      delete this.permissions[key];
+    }
+
+    return (Object.keys(this.permissions).length === 0);
   }
 
   private async loadUserPermissionDataSet(): Promise<any> {
@@ -43,15 +57,7 @@ export class PermissionProvider {
         this.permissionDataSet = this.authConfig.permissionDataSet;
         return;
       } else {
-        try {
-          this.permissionDataSet = await this.sendGetPermissionsRequest();
-        } catch (e) {
-          throw new Error('permission data set loading failed');
-        }
-      }
-
-      if (!this.permissionDataSet || this.permissionDataSet.length === 0) {
-        throw new Error('null permission data set loaded');
+        this.permissionDataSet = await this.sendGetPermissionsRequest();
       }
     } else {
       throw new Error('permissions not enabled');

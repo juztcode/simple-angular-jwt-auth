@@ -6,11 +6,11 @@ import 'rxjs/add/observable/fromPromise';
 import 'rxjs/add/operator/mergeMap';
 import 'rxjs/add/observable/throw';
 
-import {AuthProvider} from '../providers/auth.provider';
-import {ApiError} from '../types/api-error.type';
-import {AuthConfig} from '../types/auth-config.type';
-import {AuthConfigAdditional} from '../types/auth-config-additional.type';
-import {AuthConfigProvider} from './auth-config.provider';
+import {AuthProvider} from '../auth/auth.provider';
+import {ApiError} from '../../types/api-error.type';
+import {AuthConfig} from '../../types/auth-config.type';
+import {AuthConfigAdditional} from '../../types/auth-config-additional.type';
+import {AuthConfigProvider} from '../auth-config/auth-config.provider';
 
 @Injectable()
 export class TokenInterceptor implements HttpInterceptor {
@@ -26,7 +26,7 @@ export class TokenInterceptor implements HttpInterceptor {
   }
 
   private handleError(error: HttpErrorResponse | any, request: HttpRequest<any>, next: HttpHandler) {
-    const errorBody = <ApiError>error.error;
+    const errorBody = this.authConfig.convertToApiErrorType(error.error);
 
     if (this.authConfig.refreshTokenEnabled && error.status === this.authConfig.accessTokenExpiredResponseStatus &&
       errorBody.errorCode === this.authConfig.accessTokenExpiredErrorCode) {

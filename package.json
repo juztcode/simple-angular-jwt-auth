@@ -2,22 +2,23 @@
   "name": "simple-angular-jwt-auth",
   "description": "authentication package for angular 5 using HttpClientModule",
   "author": "randil.fernando@outlook.com",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "license": "MIT",
   "scripts": {
-    "build": "ng-packagr -p ng-package.json"
+    "build": "ng-packagr -p ng-package.json",
+    "pack": "npm run build && cd ./dist && npm pack"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/randilfernando/jwt-auth"
+    "url": "git+https://github.com/randilfernando/simple-angular-jwt-auth"
   },
   "publishConfig": {
     "access": "public"
   },
   "bugs": {
-    "url": "https://github.com/randilfernando/jwt-auth/issues"
+    "url": "https://github.com/randilfernando/simple-angular-jwt-auth/issues"
   },
-  "homepage": "https://github.com/randilfernando/jwt-auth#readme",
+  "homepage": "https://github.com/randilfernando/simple-angular-jwt-auth#readme",
   "keywords": [
     "npm",
     "angular5"
