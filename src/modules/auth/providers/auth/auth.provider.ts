@@ -56,10 +56,15 @@ export class AuthProvider {
     const condition = auth !== null && auth.accessToken !== null && typeof auth.accessToken === 'string' && auth.accessToken.length > 0;
 
     if (condition) {
-      await Promise.all([this.setAccessToken(auth.accessToken, persist), this.setRefreshToken(auth.refreshToken, persist)]);
+      try {
+        await Promise.all([this.setAccessToken(auth.accessToken, persist), this.setRefreshToken(auth.refreshToken, persist)]);
 
-      if (this.authConfig.userPermissionsEnabled) {
-        await this.permissionProvider.setPermissionByUserRoleId(this.getValueInToken(this.authConfig.userRoleIdKey));
+        if (this.authConfig.userPermissionsEnabled) {
+          await this.permissionProvider.setPermissionByUserRoleId(this.getValueInToken(this.authConfig.userRoleIdKey));
+        }
+      } catch (e) {
+        await this.logOut();
+        throw e;
       }
     }
 
@@ -105,7 +110,11 @@ export class AuthProvider {
   }
 
   public getValueInToken<T>(key: string): T {
-    return <T>(TokenDecoderHelper.DecodeToken(this.accessToken)[key]);
+    if (this.accessToken) {
+      return <T>(TokenDecoderHelper.DecodeToken(this.accessToken)[key]);
+    } else {
+      return null;
+    }
   }
 
   private async getAuth(): Promise<Auth> {

@@ -17,17 +17,14 @@ export class PermissionProvider {
   public getPermissions(): any {
     if (this.authConfig.userPermissionsEnabled) {
       return this.permissions;
+    } else {
+      throw new Error('permissions not enabled');
     }
-
-    throw new Error('permissions not enabled');
   }
 
   public async setPermissionByUserRoleId(userRoleId: number) {
     if (this.authConfig.userPermissionsEnabled) {
       await this.loadUserPermissionDataSet();
-      if (this.permissionDataSet && this.permissionDataSet.length === 0) {
-        throw new Error('permissions not loaded');
-      }
 
       const result = this.permissionDataSet.filter(up => up.userRoleId === userRoleId);
       if (result.length === 0) {
