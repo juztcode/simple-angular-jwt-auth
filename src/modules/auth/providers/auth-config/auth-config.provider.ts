@@ -14,17 +14,18 @@ export class AuthConfigProvider {
   }
 
   private setConfig(mainConfig: AuthConfig, additionalConfig: AuthConfigAdditional) {
-    if (mainConfig.refreshTokenUrl === null) {
+    if (mainConfig.refreshTokenEnabled && mainConfig.refreshTokenUrl === null) {
       mainConfig.refreshTokenEnabled = false;
       console.error('refreshTokenUrl is not present. setting refreshTokenEnabled to false');
     }
 
-    if (!(mainConfig.tokenGetter && mainConfig.tokenSetter && mainConfig.tokenRemover)) {
-      mainConfig.persistTokensEnabled = false;
-      console.error('tokenGetter, tokenSetter or tokenRemover functions not present setting persistTokens to false');
+    if (mainConfig.refreshTokenEnabled && !(mainConfig.refreshTokenExpiredResponseStatus && mainConfig.refreshTokenExpiredErrorCode)) {
+      mainConfig.refreshTokenEnabled = false;
+      console.error('refresh token expired response status is not present setting refreshTokenEnabled to false');
     }
 
-    if (!((mainConfig.permissionDataSet && mainConfig.permissionDataSet.length > 0) || mainConfig.getPermissionUrl)) {
+    if (mainConfig.userPermissionsEnabled &&
+      !((mainConfig.permissionDataSet && mainConfig.permissionDataSet.length > 0) || mainConfig.getPermissionUrl)) {
       mainConfig.userPermissionsEnabled = false;
       console.error('permissions data set not present or getPermissionUrl not present setting userPermissionsEnabled to false');
     }

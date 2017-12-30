@@ -32,7 +32,7 @@ export class PermissionProvider {
 
       const result = this.permissionDataSet.filter(up => up.userRoleId === userRoleId);
       if (result.length === 0) {
-        throw new Error(`user role ${userRoleId} is unknown`);
+        throw new Error(`user role ${userRoleId} is unknown. check ${this.authConfig.userRoleIdKey} in jwt payload.`);
       }
       Object.assign(this.permissions, result[0].permissions);
     } else {
