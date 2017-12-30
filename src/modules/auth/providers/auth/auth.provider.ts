@@ -60,7 +60,8 @@ export class AuthProvider {
         await Promise.all([this.setAccessToken(auth.accessToken, persist), this.setRefreshToken(auth.refreshToken, persist)]);
 
         if (this.authConfig.userPermissionsEnabled) {
-          await this.permissionProvider.setPermissionByUserRoleId(this.getValueInToken(this.authConfig.userRoleIdKey));
+          const userRoleId = this.getValueInToken<number>(this.authConfig.userRoleIdKey);
+          await this.permissionProvider.setPermissionByUserRoleId(userRoleId);
         }
       } catch (e) {
         await this.logOut();
