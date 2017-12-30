@@ -7,7 +7,6 @@ import 'rxjs/add/operator/mergeMap';
 import 'rxjs/add/observable/throw';
 
 import {AuthProvider} from '../auth/auth.provider';
-import {ApiError} from '../../types/api-error.type';
 import {AuthConfig} from '../../types/auth-config.type';
 import {AuthConfigAdditional} from '../../types/auth-config-additional.type';
 import {AuthConfigProvider} from '../auth-config/auth-config.provider';
@@ -28,13 +27,22 @@ export class TokenInterceptor implements HttpInterceptor {
   private handleError(error: HttpErrorResponse | any, request: HttpRequest<any>, next: HttpHandler) {
     const errorBody = this.authConfig.convertToApiErrorType(error.error);
 
-    if (this.authConfig.refreshTokenEnabled && error.status === this.authConfig.accessTokenExpiredResponseStatus &&
+    const authProvider = this.injector.get(AuthProvider);
+
+    if (error.status === this.authConfig.accessTokenExpiredResponseStatus &&
       errorBody.errorCode === this.authConfig.accessTokenExpiredErrorCode) {
-      const authProvider = this.injector.get(AuthProvider);
-      return Observable.fromPromise(authProvider.refresh()).mergeMap((status) => {
-        const authenticatedRequest = this.authenticate(request);
-        return next.handle(authenticatedRequest);
-      });
+
+      if (this.authConfig.refreshTokenEnabled) {
+        return Observable.fromPromise(authProvider.refresh()).mergeMap(() => {
+          const authenticatedRequest = this.authenticate(request);
+          return next.handle(authenticatedRequest);
+        });
+      } else {
+        authProvider.logOut();
+      }
+    } else if (error.status === this.authConfig.refreshTokenExpiredResponseStatus &&
+      errorBody.errorCode === this.authConfig.refreshTokenExpiredErrorCode) {
+      authProvider.logOut();
     }
 
     return Observable.throw(new Error(`${errorBody.errorMessage} error occurred. error code is ${errorBody.errorCode}`));

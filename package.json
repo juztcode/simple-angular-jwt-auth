@@ -2,11 +2,12 @@
   "name": "simple-angular-jwt-auth",
   "description": "authentication package for angular 5 using HttpClientModule",
   "author": "randil.fernando@outlook.com",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "license": "MIT",
   "scripts": {
     "build": "ng-packagr -p ng-package.json",
-    "pack": "npm run build && cd ./dist && npm pack"
+    "pack": "npm run build && cd ./dist && npm pack",
+    "lint": "tslint --project ./"
   },
   "repository": {
     "type": "git",

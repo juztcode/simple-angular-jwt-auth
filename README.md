@@ -7,6 +7,15 @@ This library uses HttpClient to send http requests.
 
 Click [here](https://embed.plnkr.co/qstWVYDhzfY4L4YF5Pxp?p=preview) to find a working demo.
 
+## Available Functionality
+
+1. Basic authentication (Login, logout, check status)
+1. Http interceptor to append tokens
+1. Can extend the authentication flow (via setAuth function)
+1. Decode and get token value (This will decode the token and return the requested value)
+1. User permissions to manage access
+1. Refresh tokens workflow
+
 ## Add library to your project
 
 ```bash
@@ -45,9 +54,9 @@ export interface AuthConfig {
   refreshTokenUrl?: string;
   getPermissionUrl?: string;
   permissionDataSet?: UserPermissions[];
-  tokenGetter: (tokenName: string) => Promise<string>;
-  tokenSetter: (tokenName: string, token: string) => Promise<any>;
-  tokenRemover: (tokenName: string) => Promise<any>;
+  tokenGetter?: (tokenName: string) => Promise<string>;
+  tokenSetter?: (tokenName: string, token: string) => Promise<any>;
+  tokenRemover?: (tokenName: string) => Promise<any>;
 }
 ```
 
@@ -118,7 +127,12 @@ export const DEFAULT_ADDITIONAL_AUTH_CONFIG: AuthConfigAdditional = {
 1. accessTokenExpiredResponseStatus - Response status when access token expired. (used to retry the response)
 1. accessTokenExpiredErrorCode - You need to send error code inside the access token expired response. (used to retry the response)
 
->Note: Token interceptor will check error response for above conditions and retry the response.
+>Note: Token interceptor will check error response for above conditions and retry the response. If refresh token not enabled user will logout
+
+1. refreshTokenExpiredResponseStatus - Response status when refresh token expired
+2. refreshTokenExpiredErrorCode - You need to send error code inside the refresh token expired response.
+
+>Note: If a refresh token expired response received the user will logout.
 
 1. accessTokenHeaderName - Header name use when appending access token in each request.
 1. accessTokenPrefix - Prefix used when appending token (eg: Bearer {access-token})
