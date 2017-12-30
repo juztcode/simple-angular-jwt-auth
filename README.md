@@ -5,6 +5,8 @@
 Simple-angular-jwt-auth is a library that can be used to implement authentication workflow of your angular 5+ application.
 This library uses HttpClient to send http requests.
 
+Click [here](https://embed.plnkr.co/qstWVYDhzfY4L4YF5Pxp?p=preview) to find a working demo.
+
 ## Add library to your project
 
 ```bash
@@ -331,5 +333,6 @@ This will return the permissions object inside PermissionsProvider and you can u
 
 ## Help
 
-Repository: [https://github.com/randilfernando/simple-angular-jwt-auth](https://github.com/randilfernando/simple-angular-jwt-auth)
-Issues: [https://github.com/randilfernando/simple-angular-jwt-auth/issues](https://github.com/randilfernando/simple-angular-jwt-auth/issues)
+Repository: [https://github.com/randilfernando/simple-angular-jwt-auth](https://github.com/randilfernando/simple-angular-jwt-auth)  
+Issues: [https://github.com/randilfernando/simple-angular-jwt-auth/issues](https://github.com/randilfernando/simple-angular-jwt-auth/issues)  
+Demo: [https://embed.plnkr.co/qstWVYDhzfY4L4YF5Pxp?p=preview](https://embed.plnkr.co/qstWVYDhzfY4L4YF5Pxp?p=preview)
