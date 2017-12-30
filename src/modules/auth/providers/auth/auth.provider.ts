@@ -83,6 +83,14 @@ export class AuthProvider {
     }
   }
 
+  public getValueInToken<T>(key: string): T {
+    if (this.accessToken) {
+      return <T>(TokenDecoderHelper.DecodeToken(this.accessToken)[key]);
+    } else {
+      return null;
+    }
+  }
+
   private async setAccessToken(token: string, persist: boolean = true): Promise<boolean> {
     const condition = token !== null && typeof token === 'string' && token.length > 0;
 
@@ -107,14 +115,6 @@ export class AuthProvider {
     }
 
     return condition;
-  }
-
-  public getValueInToken<T>(key: string): T {
-    if (this.accessToken) {
-      return <T>(TokenDecoderHelper.DecodeToken(this.accessToken)[key]);
-    } else {
-      return null;
-    }
   }
 
   private async getAuth(): Promise<Auth> {
