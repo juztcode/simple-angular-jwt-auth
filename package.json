@@ -6,7 +6,8 @@
   "license": "MIT",
   "scripts": {
     "build": "ng-packagr -p ng-package.json",
-    "pack": "npm run build && cd ./dist && npm pack"
+    "pack": "npm run build && cd ./dist && npm pack",
+    "lint": "tslint --project ./"
   },
   "repository": {
     "type": "git",
