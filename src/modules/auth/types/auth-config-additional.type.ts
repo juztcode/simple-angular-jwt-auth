@@ -17,4 +17,5 @@ export interface AuthConfigAdditional {
   convertToAuthType?: (data: any) => Auth;
   convertToUserPermissionType?: (data: any) => UserPermissions;
   convertToApiErrorType?: (error: any) => ApiError;
+  globalHttpHeaders?: {key: string, value: string, excludedMethods?: string[]}[];
 }

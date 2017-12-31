@@ -10,6 +10,7 @@ import {AuthProvider} from '../auth/auth.provider';
 import {AuthConfig} from '../../types/auth-config.type';
 import {AuthConfigAdditional} from '../../types/auth-config-additional.type';
 import {AuthConfigProvider} from '../auth-config/auth-config.provider';
+import {ArrayUtilsHelper} from '../../helpers/array-utils.helper';
 
 @Injectable()
 export class TokenInterceptor implements HttpInterceptor {
@@ -20,7 +21,7 @@ export class TokenInterceptor implements HttpInterceptor {
   }
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    const authenticatedRequest = this.authenticate(request);
+    const authenticatedRequest = this.appendHeaders(request);
     return next.handle(authenticatedRequest).pipe(catchError(err => this.handleError(err, request, next)));
   }
 
@@ -34,7 +35,7 @@ export class TokenInterceptor implements HttpInterceptor {
 
       if (this.authConfig.refreshTokenEnabled) {
         return Observable.fromPromise(authProvider.refresh()).mergeMap(() => {
-          const authenticatedRequest = this.authenticate(request);
+          const authenticatedRequest = this.appendHeaders(request);
           return next.handle(authenticatedRequest);
         });
       } else {
@@ -48,18 +49,20 @@ export class TokenInterceptor implements HttpInterceptor {
     return Observable.throw(new Error(`${errorBody.errorMessage} error occurred. error code is ${errorBody.errorCode}`));
   }
 
-  private authenticate(request: HttpRequest<any>): HttpRequest<any> {
+  private appendHeaders(request: HttpRequest<any>): HttpRequest<any> {
     const authProvider = this.injector.get(AuthProvider);
     let headers = new HttpHeaders();
 
-    if (!(request.method === 'GET')) {
-      headers = headers.set('Content-Type', 'application/json');
-    }
+    this.authConfig.globalHttpHeaders.forEach(headerData => {
+      if (!ArrayUtilsHelper.IsInArray<string>(headerData.excludedMethods, request.method)) {
+        headers = headers.set(headerData.key, headerData.value);
+      }
+    });
 
     if (this.authConfig.refreshTokenEnabled && request.url === this.authConfig.refreshTokenUrl) {
       headers = headers.set(this.authConfig.refreshTokenHeaderName,
         `${this.authConfig.refreshTokenPrefix} ${authProvider.getRefreshToken()}`);
-    } else if (!this.inExcludedUrls(request.url)) {
+    } else if (!ArrayUtilsHelper.IsInArray<string>(this.authConfig.tokenInterceptorExcludedUrls, request.url)) {
       headers = headers.set(this.authConfig.accessTokenHeaderName,
         `${this.authConfig.accessTokenPrefix} ${authProvider.getAccessToken()}`);
     }
@@ -67,15 +70,5 @@ export class TokenInterceptor implements HttpInterceptor {
     return request.clone({
       headers: headers
     });
-  }
-
-  private inExcludedUrls(url: string) {
-    this.authConfig.tokenInterceptorExcludedUrls.forEach(excludedUrl => {
-      if (excludedUrl === url) {
-        return true;
-      }
-    });
-
-    return false;
   }
 }
