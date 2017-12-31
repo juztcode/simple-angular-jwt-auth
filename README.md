@@ -5,7 +5,7 @@
 Simple-angular-jwt-auth is a library that can be used to implement authentication workflow of your angular 5+ application.
 This library uses HttpClient to send http requests.
 
-*For the changes introduced in this release please refer the changes section*
+>Note: For the changes introduced in this release please refer the [New features and changes]() section
 
 Click [here](https://embed.plnkr.co/qstWVYDhzfY4L4YF5Pxp?p=preview) to find a working demo.
 
