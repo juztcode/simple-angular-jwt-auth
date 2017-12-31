@@ -26,13 +26,9 @@ export class PermissionProvider {
     if (this.authConfig.userPermissionsEnabled) {
       await this.loadUserPermissionDataSet();
 
-      if (!this.permissionDataSet || this.permissionDataSet.length === 0) {
-        throw new Error('permission data set is empty');
-      }
-
       const result = this.permissionDataSet.filter(up => up.userRoleId === userRoleId);
       if (result.length === 0) {
-        throw new Error(`user role ${userRoleId} is unknown. check ${this.authConfig.userRoleIdKey} in jwt payload.`);
+        throw new Error(`no matching permissions for ${this.authConfig.userRoleIdKey}: ${userRoleId}`);
       }
       Object.assign(this.permissions, result[0].permissions);
     } else {
@@ -49,13 +45,13 @@ export class PermissionProvider {
     return (Object.keys(this.permissions).length === 0);
   }
 
-  private async loadUserPermissionDataSet(): Promise<any> {
+  private async loadUserPermissionDataSet(): Promise<boolean> {
     if (this.authConfig.userPermissionsEnabled) {
       if (this.permissionDataSet && this.permissionDataSet.length > 0) {
-        return;
+        return true;
       } else if (this.authConfig.permissionDataSet && this.authConfig.permissionDataSet.length > 0) {
         this.permissionDataSet = this.authConfig.permissionDataSet;
-        return;
+        return true;
       } else {
         this.permissionDataSet = await this.sendGetPermissionsRequest();
       }

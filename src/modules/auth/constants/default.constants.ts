@@ -15,5 +15,6 @@ export const DEFAULT_ADDITIONAL_AUTH_CONFIG: AuthConfigAdditional = {
   tokenRemover: async (tokenName: string) => localStorage.removeItem(tokenName),
   convertToAuthType: (auth: Auth) => auth,
   convertToUserPermissionType: (userPermissions: UserPermissions) => userPermissions,
-  convertToApiErrorType: (apiError: ApiError) => apiError
+  convertToApiErrorType: (apiError: ApiError) => apiError,
+  globalHttpHeaders: []
 };

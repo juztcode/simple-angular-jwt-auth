@@ -19,32 +19,30 @@ export class AuthProvider {
   }
 
   public async login(requestBody: any): Promise<boolean> {
-    if (this.authConfig.loginUrl) {
-      const auth = await this.sendLoginRequest(requestBody);
-      return await this.setAuth(auth);
-    } else {
-      throw new Error('login url not set');
-    }
+    const auth = await this.sendLoginRequest(requestBody);
+    return await this.setAuth(auth);
   }
 
   public async refresh(): Promise<boolean> {
-    if (this.authConfig.refreshTokenEnabled && this.authConfig.refreshTokenUrl) {
+    if (this.authConfig.refreshTokenEnabled) {
       const auth = await this.sendRefreshTokenRequest();
       return await this.setAuth(auth);
     } else {
-      throw new Error('refresh token not enabled or refresh token url not set');
+      throw new Error('refresh token not enabled');
     }
   }
 
   public async isLoggedIn(): Promise<boolean> {
-    if (!this.accessToken && this.authConfig.persistTokensEnabled) {
+    if (this.accessToken) {
+      return true;
+    } else if (this.authConfig.persistTokensEnabled) {
       const auth: Auth = {accessToken: null, refreshToken: null};
       const accessTokenPromise = this.authConfig.tokenGetter(this.authConfig.accessTokenStorageKey);
       const refreshTokenPromise = this.authConfig.tokenGetter(this.authConfig.refreshTokenStorageKey);
       [auth.accessToken, auth.refreshToken] = await Promise.all([accessTokenPromise, refreshTokenPromise]);
       return await this.setAuth(auth, false);
     } else {
-      return true;
+      return false;
     }
   }
 

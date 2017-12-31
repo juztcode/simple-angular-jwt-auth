@@ -5,16 +5,31 @@
 Simple-angular-jwt-auth is a library that can be used to implement authentication workflow of your angular 5+ application.
 This library uses HttpClient to send http requests.
 
+>Note: For the changes introduced in this release please refer the [New features and changes]() section
+
 Click [here](https://embed.plnkr.co/qstWVYDhzfY4L4YF5Pxp?p=preview) to find a working demo.
 
 ## Available Functionality
 
-1. Basic authentication (Login, logout, check status)
-1. Http interceptor to append tokens
-1. Can extend the authentication flow (via setAuth function)
-1. Decode and get token value (This will decode the token and return the requested value)
-1. User permissions to manage access
-1. Refresh tokens workflow
+- Basic authentication (Login, logout, check status)
+- Http interceptor to append tokens
+- Add additional http headers
+- Can extend the authentication flow (via setAuth function)
+- Decode and get token value (This will decode the token and return the requested value)
+- User permissions
+- Refresh tokens workflow
+
+## New Features and Changes
+
+- tokenGetter, tokenSetter, tokenRemover moved to AuthConfigAdditional and there are default values
+>Migrate-step: Move those to the AuthConfigAdditional or you can use the default functions. The default functions are implemented using localStorage.
+
+- accessTokenExpiredResponseStatus, accessTokenExpiredErrorCode, refreshTokenExpiredResponseStatus, refreshTokenExpiredErrorCode moved
+to AuthConfig
+>Migrate-step: Add these configurations to the AuthConfig. The refreshToken attributes are optional (depends on refreshTokenEnabled)
+
+- Add extra headers to http requests
+>Migrate-step: Add 'Content-Type' header to AuthConfigAdditional.globalHttpHeaders section.
 
 ## Add library to your project
 
@@ -30,7 +45,7 @@ To use the library in your application you need to import the AuthModule in your
 ```typescript
 @NgModule({
   imports: [
-    AuthModule.forRoot(authConfig)
+    AuthModule.forRoot(authConfig, authConfigAdditional)
   ]
 })
 export class AppModule {}
@@ -54,32 +69,37 @@ export interface AuthConfig {
   refreshTokenUrl?: string;
   getPermissionUrl?: string;
   permissionDataSet?: UserPermissions[];
-  tokenGetter?: (tokenName: string) => Promise<string>;
-  tokenSetter?: (tokenName: string, token: string) => Promise<any>;
-  tokenRemover?: (tokenName: string) => Promise<any>;
+  accessTokenExpiredResponseStatus: number;
+  accessTokenExpiredErrorCode: number;
+  refreshTokenExpiredResponseStatus?: number;
+  refreshTokenExpiredErrorCode?: number;
 }
 ```
 
-1. persistTokensEnabled - If true the tokens are saved in the storage and tokenGetter, tokenSetter and tokenRemover functions also need to provide.
+- persistTokensEnabled - If true the tokens are saved in the storage and tokenGetter, tokenSetter and tokenRemover functions also need to provide.
 If those any of those functions are not provided the persistTokensEnabled will be false and hence the tokens are not saved in the storage.
-1. refreshTokenEnabled - Enable [refresh token](https://auth0.com/learn/refresh-tokens/) workflow. If the access token is expired then it 
-try to get new token pair using refresh token and then retry the request again.
-1. userPermissionEnabled - Enable userRole based user permissions. To use this you need to have the userRoleId inside the token and you can
+
+- refreshTokenEnabled - Enable [refresh token](https://auth0.com/learn/refresh-tokens/) workflow. If the access token is expired then it 
+try to get new token pair using refresh token and then retry the request again. You need to provide token expired error codes.
+
+- userPermissionEnabled - Enable userRole based user permissions. To use this you need to have the userRoleId inside the token and you can
 configure the attribute name (see: AuthOptionalConfig). The user permissions are stored in the PermissionProvider and can be mapped inside any
 component. When the login is success the new permissions are set usign the userRoleId inside the token.
-1. loginUrl - Url used in login and the request must receive a Auth response and then the accessToken and refreshToken are saved.
+
+- loginUrl - Url used in login and the request must receive a Auth response and then the accessToken and refreshToken are saved.
 ```typescript
 export interface Auth {
   accessToken: string;
   refreshToken: string;
 }
 ```
-1. refreshTokenUrl (optional) - Use to get new token pair using refresh token. Auth response should be send with new token pair.
+
+- refreshTokenUrl (optional) - Use to get new token pair using refresh token. Auth response should be send with new token pair.
 
 There are two ways to set permissions.
+- getPermissionUrl (optional) - This use a url to get permissions. (see: UserPermission type)
+- permissionDataSet (optional) - Use predefined permissions. (see: UserPermission type)
 
-1. getPermissionUrl (optional) - This use a url to get permissions. (see: UserPermission type)
-2. permissionDataSet (optional) - Use predefined permissions. (see: UserPermission type)
 ```typescript
 export interface UserPermissions {
   userRoleId: number;
@@ -87,29 +107,21 @@ export interface UserPermissions {
 }
 ``` 
 
-If the persistTokens is enabled you need to pass tokenGetter, tokenSetter and tokenRemover functions.
-The return type of the function should be a Promise.
+- accessTokenExpiredResponseStatus - Response status when access token expired. (used to retry the response)
+- accessTokenExpiredErrorCode - You need to send error code inside the access token expired response. (used to retry the response)
 
-eg: tokenGetter function
+>Note: Token interceptor will check error response for above conditions and retry the response. If refresh token not enabled user will logout
 
-```typescript
-async (tokenName: string) => {
-  return localStorage.getItem(tokenName);
-}
-```
+- refreshTokenExpiredResponseStatus(optional/depend on refreshTokenEnabled) - Response status when refresh token expired
+- refreshTokenExpiredErrorCode(optional/depend on refreshTokenEnabled) - You need to send error code inside the refresh token expired response.
 
-> Note: If you not pass tokenGetter, tokenSetter or tokenRemover functions then the persistTokens will be false.
+>Note: If a refresh token expired response received the user will logout.
 
 ## AuthConfigAdditional (additional configurations)
 
 Those are the additional configurations default values are used and you can override them.
-
 ```typescript
 export const DEFAULT_ADDITIONAL_AUTH_CONFIG: AuthConfigAdditional = {
-  accessTokenExpiredResponseStatus: 403,
-  accessTokenExpiredErrorCode: 4001,
-  refreshTokenExpiredResponseStatus: 403,
-  refreshTokenExpiredErrorCode: 4002,
   accessTokenHeaderName: 'Authorization',
   accessTokenPrefix: 'Bearer',
   refreshTokenHeaderName: 'Authorization',
@@ -117,35 +129,28 @@ export const DEFAULT_ADDITIONAL_AUTH_CONFIG: AuthConfigAdditional = {
   tokenInterceptorExcludedUrls: [],
   accessTokenStorageKey: 'access-token',
   refreshTokenStorageKey: 'refresh-token',
-  userIdKey: 'userId',
   userRoleIdKey: 'userRoleId',
+  tokenGetter: async (tokenName: string) => localStorage.getItem(tokenName),
+  tokenSetter: async (tokenName: string, token: any) => localStorage.setItem(tokenName, token),
+  tokenRemover: async (tokenName: string) => localStorage.removeItem(tokenName),
+  globalHttpHeaders: [],
   convertToAuthType: (auth: Auth) => auth,
-  convertToUserPermissionType: (userPermissions: UserPermissions) => userPermissions
+  convertToUserPermissionType: (userPermissions: UserPermissions) => userPermissions,
+  convertToApiErrorType: (apiError: ApiError) => apiError
 };
 ```
 
-1. accessTokenExpiredResponseStatus - Response status when access token expired. (used to retry the response)
-1. accessTokenExpiredErrorCode - You need to send error code inside the access token expired response. (used to retry the response)
-
->Note: Token interceptor will check error response for above conditions and retry the response. If refresh token not enabled user will logout
-
-1. refreshTokenExpiredResponseStatus - Response status when refresh token expired
-2. refreshTokenExpiredErrorCode - You need to send error code inside the refresh token expired response.
-
->Note: If a refresh token expired response received the user will logout.
-
-1. accessTokenHeaderName - Header name use when appending access token in each request.
-1. accessTokenPrefix - Prefix used when appending token (eg: Bearer {access-token})
-1. refreshTokenHeaderName - Header name use when appending refresh token in refresh request (see: refreshTokenUrl in AuthConfig).
-1. refreshTokenPrefix - Prefix used when appending token (eg: Basic {refresh-token})
-1. tokenInterceptorExcludedUrls - These urls are excluded when appending the access token. (eg: Login url)
+- accessTokenHeaderName - Header name use when appending access token in each request.
+- accessTokenPrefix - Prefix used when appending token (eg: Bearer {access-token})
+- refreshTokenHeaderName - Header name use when appending refresh token in refresh request (see: refreshTokenUrl in AuthConfig).
+- refreshTokenPrefix - Prefix used when appending token (eg: Basic {refresh-token})
+- tokenInterceptorExcludedUrls - These urls are excluded when appending the access token. (eg: Login url)
 
 >Note: Login url is automatically added to the excluded list
 
-1. accessTokenStorageKey = key used when storing the access-token in key value pair.
-1. refreshTokenStorageKey = key used when storing the refresh-token in key value pair.
-1. userIdKey - attribute name related to the userId inside the access-token payload.
-1. userRoleIdKey - attribute name related to the userRoleId inside the access-token payload.
+- accessTokenStorageKey = key used when storing the access-token in key value pair.
+- refreshTokenStorageKey = key used when storing the refresh-token in key value pair.
+- userRoleIdKey - attribute name related to the userRoleId inside the access-token payload.
 
 >Note: To use permissions feature you need to have userRoleId inside the token. The user role id must be a one present in the permission data set.
 
@@ -171,10 +176,31 @@ sample token payload
 }
 ```
 
-You configure the auth response type and permission response type.
+- tokenGetter, tokenSetter, tokenRemover - If you plan to use different storage methods you can override default functions
+eg: If you have a storage provider and need to use that
+
+```typescript
+const storage = new StorageProvider(); //you need to create a instance of the provider manually to use it inside AppModule.
+
+async (tokenName: string) => {
+  return storage.read(tokenName); //your method call
+}
+```
+
+- globalHttpHeaders - You can provide a list of additional http headers that need to be appended. Also you can provide excluded method list.
+
+```typescript
+const data = [
+  {key: 'Content-Type', value: 'application/json', excludedMethods: ['GET']}
+]
+```
+
+>Note: excludedMethods array is optional.
+
+You can configure the auth response type, permission response type and api error response type.
 This library uses the generator functions to convert response to the relevant type.
 
-1. convertToAuthType - This function used to convert the response to the Auth type
+- convertToAuthType - This function used to convert the response to the Auth type
 
 >Note: If not supplied the default function is used
 
@@ -201,7 +227,7 @@ Then the generator function
 }
 ```
 
-1. convertToUserPermissionType - This function used to convert the response to the UserPermission type
+- convertToUserPermissionType - This function used to convert the response to the UserPermission type
 
 >Note: If not supplied the default function is used
 
@@ -241,7 +267,7 @@ Then the generator function
 }
 ```
 
-1. convertToApiErrorType - This function used to convert the response to the UserPermission type
+- convertToApiErrorType - This function used to convert the response to the UserPermission type
 
 >Note: If not supplied the default function is used
 
