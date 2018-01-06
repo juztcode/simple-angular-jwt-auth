@@ -1,74 +1,211 @@
-[![Build Status](https://www.travis-ci.org/randilfernando/simple-angular-jwt-auth.svg?branch=master)](https://travis-ci.org/randilfernando/simple-angular-jwt-auth)
+[![Build Status](https://travis-ci.org/juztcode/angular-auth.svg?branch=master)](https://travis-ci.org/juztcode/angular-auth)
 [![npm Version](https://img.shields.io/npm/v/simple-angular-jwt-auth.svg)](https://www.npmjs.com/package/simple-angular-jwt-auth)
 [![npm License](https://img.shields.io/npm/l/simple-angular-jwt-auth.svg)](https://opensource.org/licenses/MIT)
 
-Simple-angular-jwt-auth is a library that can be used to implement authentication workflow of your angular 5+ application.
+@juztcode/angular-auth is a library that can be used to implement authentication workflow of your angular 5+ application.
 This library uses HttpClient to send http requests.
-
->Note: For the changes introduced in this release please refer the [New features and changes]() section
 
 Click [here](https://embed.plnkr.co/qstWVYDhzfY4L4YF5Pxp?p=preview) to find a working demo.
 
-## Available Functionality
+## Contents
 
-- Basic authentication (Login, logout, check status)
-- Http interceptor to append tokens
-- Add additional http headers
-- Can extend the authentication flow (via setAuth function)
-- Decode and get token value (This will decode the token and return the requested value)
-- User permissions
-- Refresh tokens workflow
+* [Key features](#key-features)
+* [Installation](#installation)
+* [Configure project](#configure-project)
+* [Use authentication](#use-authentication)
+  * [Use AuthProvider](#use-authprovider)
+  * [Send authenticated requests](#send-authenticated-requests)
+* [Use permissions](#use-permissions)
+  * [Use PermissionsProvider](#use-permissionsprovider)
+* [Use refresh tokens](#use-refresh-tokens)
+* [Add additional global headers](#add-additional-global-headers)
+* [Configuration options](#configuration-options)
+  * [Main options](#main-options)
+    * [Login options](#login-options)
+    * [User permission options](#user-permission-options)
+    * [Refresh token options](#refresh-token-options)
+  * [Additional options](#additional-options)
+    * [Basic options](#basic-options)
+    * [Advanced options](#advanced-options)
+    
+## Key features
 
-## New Features and Changes
+- **Login, logout, check status**
+- **Authenticate** requests
+- **Decode** token
+- **Mange access** using user permissions
+- **Refresh expired tokens** using refresh tokens
 
-- tokenGetter, tokenSetter, tokenRemover moved to AuthConfigAdditional and there are default values
->Migrate-step: Move those to the AuthConfigAdditional or you can use the default functions. The default functions are implemented using localStorage.
-
-- accessTokenExpiredResponseStatus, accessTokenExpiredErrorCode, refreshTokenExpiredResponseStatus, refreshTokenExpiredErrorCode moved
-to AuthConfig
->Migrate-step: Add these configurations to the AuthConfig. The refreshToken attributes are optional (depends on refreshTokenEnabled)
-
-- Add extra headers to http requests
->Migrate-step: Add 'Content-Type' header to AuthConfigAdditional.globalHttpHeaders section.
-
-## Add library to your project
+## Installation
 
 ```bash
-npm install simple-angular-jwt-auth --save
+npm install @juztcode/angular-auth --save
 ```
 > Note: This will install package and save the dependency in your package.json file.
 
-## Initialize library in your application
+## Configure project
 
 To use the library in your application you need to import the AuthModule in your AppModule and provide configuration.
 
 ```typescript
+import {AuthModule} from '@juztcode/angular-auth';
+
+const authConfig: AuthConfig = {
+  persistTokensEnabled: true,
+  refreshTokenEnabled: false, //optional feature see: Use refresh tokens
+  userPermissionsEnabled: false, //optional feature see: Use user permissions
+  loginUrl: LOGIN_URL,
+  accessTokenExpiredResponseStatus: 403,
+  accessTokenExpiredErrorCode: 4001,
+};
+
 @NgModule({
   imports: [
-    AuthModule.forRoot(authConfig, authConfigAdditional)
+    AuthModule.forRoot(authConfig)
   ]
 })
 export class AppModule {}
 ```
 
-Main AuthModule mainly built on the configuration you provided.
+To view response type click [here](#login-options)
 
-## Configuration
+## Use authentication
+
+### Use AuthProvider
+
+To use auth features you need to import AuthProvider.
+
+```typescript
+import {AuthProvider} from '@juztcode/angular-auth';
+
+@Injectable()
+export class LoginComponent {
+  constructor(private authProvider: AuthProvider){}
+}
+```
+
+#### login(requestBody: any): Promise<boolean>
+
+This will send the login and save the auth inside the application and persist it. 
+If the permissions are enabled this will also set the permission using the userRoleId.
+
+@parameter {any} requestBody - set as the request body of the login request
+```typescript
+let requestBody = {username: 'test', password: '1234'}
+```
+@return {Promise<boolean>} - If the login is success send true else false.
+
+#### setAuth(auth; Auth): Promise<boolean>
+
+This function can be used to save Auth retrieved by any other request. (eg: user role change request)
+
+@parameter {Auth} auth - auth retrieved
+```typescript
+let auth = {accessToken: 'access-token', refreshToken: 'refresh-token'}
+```
+@return {Promise<boolean>} - If the auth save is success return true else false.
+
+#### logOut(): Promise<boolean>
+
+Can use to logout from the application.
+This will remove the auth from memory and also from storage.
+
+#### isLoggedIn(): Promise<boolean>
+
+Can use this function to check if the user is logged in.
+If the token is present in the storage this will save the token inside the provider.
+
+#### getAccessToken(): string
+
+Return the accessToken (instance variable in the AuthProvider)
+
+>Note: This will only accessible after a successful 'login' or after a successful 'isLoggedIn;
+
+#### getRefreshToken: string
+
+Return the refreshToken (instance variable in the AuthProvider)
+
+>Note: This will only accessible after a successful 'login' or after a successful 'isLoggedIn'
+
+#### getValueInToken<T>(key: string): T
+
+@parameter {string} key - key of the attribute that need to retrieve (eg: 'userId')
+@parameter T - type the return need to be casted to
+
+### Send authenticated requests
+
+If you send http requests using HttpClient then the authentication header is appended. 
+Tokens are added under authorization tag. To view configuration and headers click [here](#basic-options)
+
+```typescript
+import {HttpClient} from '@angular/common/http';
+
+export class Service {
+  constructor (private http: HttpClient){}
+  
+  getDetails(){
+    this.http.get('https://test-angular-packages.herokuapp.com/secured');
+  }
+}
+```
+
+## Use permissions
+
+To view configurations and how to set permission data set click [here](#user-permission-options).
+
+### Use PermissionsProvider
+
+To use permissions you need to import PermissionProvider.
+
+```typescript
+import {PermissionProvider} from '@juztcode/angular-auth';
+
+@Injectable()
+export class HomeComponent {
+  constructor(private permissionProvider: PermissionProvider){}
+}
+```
+
+#### setPermissionByUserRoleId(userRoleId: number): void
+
+This will update the permission inside the PermissionProvider and affect all the places permissions are in use.
+After the login the permissions are set.
+You can use this to save permissions at any other place (eg: convert user role)
+
+@parameter {number} userRoleId - id of the user role
+
+>Note: This user role id should be a one in the permission data set
+
+#### getPermissions(): any
+
+This will return the permissions object inside PermissionsProvider and you can use it to define the user access.
+
+## Use refresh tokens
+
+To view configuration and how to enable refresh tokens click [here](#refresh-token-options)
+
+>Note: When a request is made and the access token expired response received then the request will retry after getting new token pair.
+
+## Add additional global headers
+
+You can add additional global headers in every request. See how to configure click [here](#basic-options)
+
+## Configuration options
 
 When importing the AuthModule you can provide two configurations. AuthConfig and AuthOptionalConfig. 
 AuthConfig is a mandatory while AuthOptionalConfig is a optional and has a default value.
 
-### AuthConfig (Main configuration)
+### Main options
 
 ```typescript
 export interface AuthConfig {
   persistTokensEnabled: boolean;
-  refreshTokenEnabled: boolean;
-  userPermissionsEnabled: boolean;
   loginUrl: string;
-  refreshTokenUrl?: string;
+  userPermissionsEnabled: boolean;
   getPermissionUrl?: string;
   permissionDataSet?: UserPermissions[];
+  refreshTokenEnabled: boolean;
+  refreshTokenUrl?: string;
   accessTokenExpiredResponseStatus: number;
   accessTokenExpiredErrorCode: number;
   refreshTokenExpiredResponseStatus?: number;
@@ -76,15 +213,10 @@ export interface AuthConfig {
 }
 ```
 
+#### Login options
+
 - persistTokensEnabled - If true the tokens are saved in the storage and tokenGetter, tokenSetter and tokenRemover functions also need to provide.
 If those any of those functions are not provided the persistTokensEnabled will be false and hence the tokens are not saved in the storage.
-
-- refreshTokenEnabled - Enable [refresh token](https://auth0.com/learn/refresh-tokens/) workflow. If the access token is expired then it 
-try to get new token pair using refresh token and then retry the request again. You need to provide token expired error codes.
-
-- userPermissionEnabled - Enable userRole based user permissions. To use this you need to have the userRoleId inside the token and you can
-configure the attribute name (see: AuthOptionalConfig). The user permissions are stored in the PermissionProvider and can be mapped inside any
-component. When the login is success the new permissions are set usign the userRoleId inside the token.
 
 - loginUrl - Url used in login and the request must receive a Auth response and then the accessToken and refreshToken are saved.
 ```typescript
@@ -94,7 +226,11 @@ export interface Auth {
 }
 ```
 
-- refreshTokenUrl (optional) - Use to get new token pair using refresh token. Auth response should be send with new token pair.
+#### User permission options
+
+- userPermissionEnabled - Enable userRole based user permissions. To use this you need to have the userRoleId inside the token and you can
+configure the attribute name (see: AuthOptionalConfig). The user permissions are stored in the PermissionProvider and can be mapped inside any
+component. When the login is success the new permissions are set usign the userRoleId inside the token.
 
 There are two ways to set permissions.
 - getPermissionUrl (optional) - This use a url to get permissions. (see: UserPermission type)
@@ -107,6 +243,13 @@ export interface UserPermissions {
 }
 ``` 
 
+#### Refresh token options
+
+- refreshTokenEnabled - Enable [refresh token](https://auth0.com/learn/refresh-tokens/) workflow. If the access token is expired then it 
+try to get new token pair using refresh token and then retry the request again. You need to provide token expired error codes.
+
+- refreshTokenUrl (optional) - Use to get new token pair using refresh token. Auth response should be send with new token pair.
+
 - accessTokenExpiredResponseStatus - Response status when access token expired. (used to retry the response)
 - accessTokenExpiredErrorCode - You need to send error code inside the access token expired response. (used to retry the response)
 
@@ -117,7 +260,7 @@ export interface UserPermissions {
 
 >Note: If a refresh token expired response received the user will logout.
 
-## AuthConfigAdditional (additional configurations)
+### Additional options
 
 Those are the additional configurations default values are used and you can override them.
 ```typescript
@@ -130,21 +273,33 @@ export const DEFAULT_ADDITIONAL_AUTH_CONFIG: AuthConfigAdditional = {
   accessTokenStorageKey: 'access-token',
   refreshTokenStorageKey: 'refresh-token',
   userRoleIdKey: 'userRoleId',
+  globalHttpHeaders: [],
   tokenGetter: async (tokenName: string) => localStorage.getItem(tokenName),
   tokenSetter: async (tokenName: string, token: any) => localStorage.setItem(tokenName, token),
   tokenRemover: async (tokenName: string) => localStorage.removeItem(tokenName),
-  globalHttpHeaders: [],
   convertToAuthType: (auth: Auth) => auth,
   convertToUserPermissionType: (userPermissions: UserPermissions) => userPermissions,
   convertToApiErrorType: (apiError: ApiError) => apiError
 };
 ```
 
+#### Basic options
+
 - accessTokenHeaderName - Header name use when appending access token in each request.
 - accessTokenPrefix - Prefix used when appending token (eg: Bearer {access-token})
 - refreshTokenHeaderName - Header name use when appending refresh token in refresh request (see: refreshTokenUrl in AuthConfig).
 - refreshTokenPrefix - Prefix used when appending token (eg: Basic {refresh-token})
 - tokenInterceptorExcludedUrls - These urls are excluded when appending the access token. (eg: Login url)
+
+- globalHttpHeaders - You can provide a list of additional http headers that need to be appended. Also you can provide excluded method list.
+
+```typescript
+const data = [
+  {key: 'Content-Type', value: 'application/json', excludedMethods: ['GET']}
+]
+```
+
+>Note: excludedMethods array is optional.
 
 >Note: Login url is automatically added to the excluded list
 
@@ -187,18 +342,10 @@ async (tokenName: string) => {
 }
 ```
 
-- globalHttpHeaders - You can provide a list of additional http headers that need to be appended. Also you can provide excluded method list.
-
-```typescript
-const data = [
-  {key: 'Content-Type', value: 'application/json', excludedMethods: ['GET']}
-]
-```
-
->Note: excludedMethods array is optional.
+### Advanced options
 
 You can configure the auth response type, permission response type and api error response type.
-This library uses the generator functions to convert response to the relevant type.
+This library uses functions to extract relevant type from response.
 
 - convertToAuthType - This function used to convert the response to the Auth type
 
@@ -210,7 +357,7 @@ This library uses the generator functions to convert response to the relevant ty
 }
 ```
 
-If the auth type sent from the server is different you can pass a generator function to get the Auth type
+If the auth type sent from the server is different you can define a function to extract the Auth type
 If the auth type from server
 ```json
 {
@@ -219,7 +366,7 @@ If the auth type from server
 }
 ```
 
-Then the generator function
+Then the function
 ```typescript
 (data: any) => {
   const auth: Auth = {accessToken: authFromServer.bearer, refreshToken: authFromServer.basic};
@@ -237,8 +384,8 @@ Then the generator function
 }
 ```
 
-If the user permission type sent from the server is different you can pass a generator function to get the UserPermissions type.
-The library will iterate through the data set sent from the server and apply the generator function to get the UserPermissions type.
+If the user permission type sent from the server is different you can pass a function to extract the UserPermissions type.
+The library will iterate through the data set sent from the server and apply the function to get the UserPermissions type.
 If the permission type from server
 ```json
 [
@@ -253,7 +400,7 @@ If the permission type from server
 ]
 ```
 
-Then the generator function
+Then the function
 ```typescript
 (data: any) => {
   const userPermissions: UserPermissions = {
@@ -277,7 +424,7 @@ Then the generator function
 }
 ```
 
-If the error response sent from the server is different you can pass a generator function to get the ApiError type.
+If the error response sent from the server is different you can pass a function to extract the ApiError type.
 If the error response type from server
 ```json
 {
@@ -295,84 +442,8 @@ Then the generator function
 }
 ```
 
-## Use library features in your application
-
-After initializing the library you can use Providers to access features
-
-### AuthProvider
-
-Provide authentication functionality
-
-#### login(requestBody: any): Promise<boolean>
-
-This will send the login and save the auth inside the application and persist it. 
-If the permissions are enabled this will also set the permission using the userRoleId.
-
-@parameter {any} requestBody - set as the request body of the login request
-```typescript
-let requestBody = {username: 'test', password: '1234'}
-```
-
-@return {Promise<boolean>} - If the login is success send true else false.
-
-#### setAuth(auth; Auth): Promise<boolean>
-
-This function can be used to save Auth retrieved by any other request. (eg: user role change request)
-
-@parameter {Auth} auth - auth retrieved
-```typescript
-let auth = {accessToken: 'access-token', refreshToken: 'refresh-token'}
-```
-
-@return {Promise<boolean>} - If the auth save is success return true else false.
-
-#### logOut(): Promise<boolean>
-
-Can use to logout from the application.
-This will remove the auth from memory and also from storage.
-
-#### isLoggedIn(): Promise<boolean>
-
-Can use this function to check if the user is logged in.
-If the token is present in the storage this will save the token inside the provider.
-
-#### getAccessToken(): string
-
-Return the accessToken (instance variable in the AuthProvider)
-
->Note: This will only accessible after a successful 'login' or after a successful 'isLoggedIn;
-
-#### getRefreshToken: string
-
-Return the refreshToken (instance variable in the AuthProvider)
-
->Note: This will only accessible after a successful 'login' or after a successful 'isLoggedIn;
-
-#### getValueInToken<T>(key: string): T
-
-@parameter {string} key - key of the attribute that need to retrieve (eg: 'userId')
-@parameter T - type the return need to be casted to
-
-### PermissionProvider
-
-Can use this provider to access the permission functionality
-
-#### setPermissionByUserRoleId(userRoleId: number): void
-
-This will update the permission inside the PermissionProvider and affect all the places permissions are in use.
-After the login the permissions are set.
-You can use this to save permissions at any other place (eg: convert user role)
-
-@parameter {number} userRoleId - id of the user role
-
->Note: This user role id should be a one in the permission data set
-
-#### getPermissions(): any
-
-This will return the permissions object inside PermissionsProvider and you can use it to define the user access.
-
 ## Help
 
-Repository: [https://github.com/randilfernando/simple-angular-jwt-auth](https://github.com/randilfernando/simple-angular-jwt-auth)  
-Issues: [https://github.com/randilfernando/simple-angular-jwt-auth/issues](https://github.com/randilfernando/simple-angular-jwt-auth/issues)  
+Repository: [https://github.com/juztcode/angular-auth](https://github.com/juztcode/angular-auth)  
+Issues: [https://github.com/juztcode/angular-auth/issues](https://github.com/juztcode/angular-auth/issues)  
 Demo: [https://embed.plnkr.co/qstWVYDhzfY4L4YF5Pxp?p=preview](https://embed.plnkr.co/qstWVYDhzfY4L4YF5Pxp?p=preview)
