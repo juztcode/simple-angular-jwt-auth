@@ -1,4 +1,4 @@
-[![Build Status](https://www.travis-ci.org/randilfernando/simple-angular-jwt-auth.svg?branch=master)](https://travis-ci.org/randilfernando/simple-angular-jwt-auth)
+[![Build Status](https://travis-ci.org/juztcode/angular-auth.svg?branch=master)](https://travis-ci.org/juztcode/angular-auth)
 [![npm Version](https://img.shields.io/npm/v/simple-angular-jwt-auth.svg)](https://www.npmjs.com/package/simple-angular-jwt-auth)
 [![npm License](https://img.shields.io/npm/l/simple-angular-jwt-auth.svg)](https://opensource.org/licenses/MIT)
 
