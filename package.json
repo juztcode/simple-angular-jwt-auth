@@ -2,7 +2,7 @@
   "name": "@juztcode/angular-auth",
   "description": "authentication package for angular 5 using HttpClientModule",
   "author": "randilfernando <randil.fernando@outlook.com>",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "license": "MIT",
   "scripts": {
     "build": "ng-packagr -p ng-package.json",

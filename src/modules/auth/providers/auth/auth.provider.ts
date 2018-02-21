@@ -140,7 +140,7 @@ export class AuthProvider {
   }
 
   private async sendLoginRequest(requestBody: any): Promise<Auth> {
-    const data = await this.http.post<any>(this.authConfig.loginUrl, JSON.stringify(requestBody)).toPromise();
+    const data = await this.http.post<any>(this.authConfig.loginUrl, requestBody).toPromise();
     return this.authConfig.convertToAuthType(data);
   }
 
