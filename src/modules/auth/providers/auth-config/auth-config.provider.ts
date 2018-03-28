@@ -1,7 +1,9 @@
 import {AuthConfig} from '../../types/auth-config.type';
 import {AuthConfigAdditional} from '../../types/auth-config-additional.type';
 import {DEFAULT_ADDITIONAL_AUTH_CONFIG} from '../../constants/default.constants';
+import {Injectable} from '@angular/core';
 
+@Injectable()
 export class AuthConfigProvider {
   private config: AuthConfigAdditional & AuthConfig;
 
