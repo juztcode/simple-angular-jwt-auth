@@ -4,6 +4,7 @@
   "author": "randilfernando <randil.fernando@outlook.com>",
   "version": "0.1.1",
   "license": "MIT",
+  "typings": "angular-auth.d.ts",
   "scripts": {
     "build": "ng-packagr -p ng-package.json",
     "pack": "npm run build && cd ./dist && npm pack",
